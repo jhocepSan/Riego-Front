@@ -1,0 +1,412 @@
+:root {
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.fondoCuerpo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #171923b0;
+}
+
+.contenedor {
+    padding-top: 54px;
+}
+
+.mapContainer {
+    padding-top: 54px;
+    width: 100%;
+    height: 100vh;
+}
+
+.mapContainerSlider {
+    padding-top: 54px;
+    padding-bottom: 175px;
+    width: 100%;
+    height: 100vh;
+}
+
+.mapContainerNormal {
+    padding-top: 54px;
+    padding-bottom: 122px;
+    width: 100%;
+    height: 100vh;
+}
+
+.mapContainerSlide {
+    padding-top: 54px;
+    width: 100%;
+    height: 100vh;
+}
+
+.fondoOscuro {
+    background: #171923;
+}
+
+.menuActivo {
+    background-color: rgb(106, 240, 240);
+    border-radius: 5px;
+}
+
+.menuFlotante {
+    position: fixed;
+    z-index: 1;
+}
+
+.botonOscuro {
+    background-color: #383838;
+    color: white;
+}
+
+.cargoHeader {
+    font-size: 14px;
+}
+
+.fondoInicial {
+    background-color: #171923b0;
+    padding-top: 60px;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+.ol-attribution.ol-unselectable.ol-control.ol-uncollapsible {
+    display: none;
+}
+
+.btFlotanteMenu {
+    position: fixed;
+    z-index: 1;
+}
+
+.btFlotantePr {
+    position: fixed;
+    z-index: 1;
+    right: 5px;
+    top: 110px;
+}
+
+.btFlotantePr2 {
+    position: fixed;
+    z-index: 1;
+    right: 5px;
+    top: 160px;
+}
+
+.comboFlotante {
+    position: fixed;
+    z-index: 1;
+    left: 10px;
+    bottom: 120px;
+}
+
+.treContenido {
+    position: fixed;
+    z-index: 1;
+    left: 45px;
+    top: 60px;
+}
+
+.toolsMedicion {
+    position: fixed;
+    z-index: 1;
+    left: 45px;
+    top: 200px;
+}
+
+.showAreasInra {
+    position: fixed;
+    z-index: 1;
+    right: 45px;
+    top: 80px;
+}
+
+.showAreasForestal {
+    position: fixed;
+    z-index: 1;
+    right: 40px;
+    top: 60px;
+}
+
+.showInfoMapa {
+    position: fixed;
+    z-index: 1;
+    left: 1px;
+    top: 367px;
+}
+
+.legendContenido {
+    position: fixed;
+    z-index: 1;
+    right: 2px;
+    top: 130px;
+}
+
+.leyendaImgAlt {
+    position: fixed;
+    z-index: 1;
+    left: 5px;
+    bottom: 195px;
+}
+
+.leyendaImgAltMin {
+    position: fixed;
+    z-index: 1;
+    left: 5px;
+    bottom: 2px;
+}
+
+.btnMenu:hover {
+    background: #eef0f89f;
+}
+
+.contenedorSliderMapa {
+    margin-right: 20px;
+}
+
+.btnCapas.ol-control button,
+.btDetalle.ol-control button {
+    width: 30px;
+    height: 30px;
+}
+
+.btnDrawm.ol-control button,
+.btnSuscription.ol-control button,
+.btnSwipe.ol-control button {
+    width: 30px;
+    height: 30px;
+}
+
+.imgMapa {
+    width: 20px;
+}
+
+.imgMapag {
+    width: 10px;
+}
+
+.ol-zoom {
+    left: 4px;
+    top: 1px;
+}
+
+.ol-zoom-in {
+    width: 30px !important;
+    height: 30px !important;
+}
+
+.ol-zoom-out {
+    width: 30px !important;
+    height: 30px !important;
+}
+
+.ol-unselectable.ol-control.ol-bar.ol-top.ol-left {
+    top: 80px;
+    left: 4px;
+}
+
+.ol-full-screen.ol-unselectable.ol-control button {
+    width: 30px !important;
+    height: 30px !important;
+}
+
+.ol-zoom-extent.ol-unselectable.ol-control button {
+    width: 30px !important;
+    height: 30px !important;
+}
+
+.btnCapas {
+    left: 4px;
+    top: 205px;
+}
+
+.btDetalle {
+    bottom: 4px;
+    right: 4px;
+}
+
+.btnSwipe {
+    left: 4px;
+    top: 190px;
+}
+
+.btnSuscription {
+    left: 4px;
+    top: 240px;
+}
+
+.btnLegend {
+    right: 4px;
+    top: 100px;
+}
+
+.btnAreaInra {
+    right: 4px;
+    top: 60px;
+}
+
+.btnDrawing {
+    left: 4px;
+    top: 225px;
+}
+
+.btnDrawm {
+    left: 4px;
+    top: 155px;
+}
+
+.btnInfoMap {
+    left: 4px;
+    top: 330px;
+}
+
+.btnAddGeo {
+    left: 4px;
+    top: 293px
+}
+
+.ol-control button,
+.btnMapaR {
+    background-color: rgba(33, 47, 61, .8) !important;
+    color: aliceblue !important;
+}
+
+.bgBlue {
+    background-color: rgb(0, 0, 58);
+}
+
+.cardColorB {
+    background: #43536a;
+    color: white;
+    height: 142px;
+}
+
+.cardColorA {
+    background: #dae3f2;
+    height: 142px;
+}
+
+.optActivate {
+    background: #4f5050;
+    color: white;
+}
+
+.optActivateA {
+    background: #dae3f2;
+    color: black;
+}
+
+.ol-swipe:after,
+.ol-swipe button:before,
+.ol-swipe button:after {
+    background: none;
+}
+
+.ol-swipe:before {
+    background: rgba(0, 0, 0, .5) !important;
+}
+
+.ol-swipe button {
+    height: 30px;
+    width: 30px;
+    background-image: url('$images/btnSwipe.png');
+    background-size: 30px;
+}
+
+.rs-anim-fade.rs-anim-in {
+    z-index: 9999;
+}
+
+.colorFondoModal {
+    background-color: rgba(33, 47, 61, .8) !important;
+}
+
+.colorFondoModal2 {
+    background-color: rgba(117, 117, 117, 0.8) !important;
+}
+
+.ol-tooltip {
+    position: relative;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 4px;
+    color: white;
+    padding: 4px 8px;
+    opacity: 0.7;
+    white-space: nowrap;
+    font-size: 12px;
+    cursor: default;
+    user-select: none;
+}
+
+.ol-tooltip-measure {
+    opacity: 1;
+    font-weight: bold;
+}
+
+.ol-tooltip-static {
+    background-color: #ffcc33;
+    color: black;
+    border: 1px solid white;
+}
+
+.ol-tooltip-measure:before,
+.ol-tooltip-static:before {
+    border-top: 6px solid rgba(0, 0, 0, 0.5);
+    border-right: 6px solid transparent;
+    border-left: 6px solid transparent;
+    content: "";
+    position: absolute;
+    bottom: -6px;
+    margin-left: -7px;
+    left: 50%;
+}
+
+.ol-tooltip-static:before {
+    border-top-color: #ffcc33;
+}
+
+color-legend {
+    --cle-font-family: Arial;
+    --cle-font-family-title: Arial;
+    --cle-letter-spacing-title: 0.5px;
+    --cle-color: white;
+    --cle-background: rgba(33, 47, 61, .8) !important;
+    ;
+    --cle-border-radius: 6px;
+    --cle-padding: 0.25rem 0.25rem 0.75rem;
+}
+
+.grupoListGroup {
+    border-top: 1px solid #ffffff;
+    border-bottom: 1px solid #ffffff;
+}
+
+.btnRotar {
+    transform: rotate(180deg);
+}
+
+.lado-derecha-arriba:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: -9px;
+    width: 0;
+    height: 0;
+    border-width: 10px;
+    border-style: solid;
+    border-color: transparent transparent transparent black;
+}
+
+.bordesColumna {
+    border-top-left-radius: 20px;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 5px;
+    border: solid 1px #747373;
+}
+
+.resaltarCuadro {
+    border-radius: 9px;
+    border: solid 1px rgb(77, 165, 39);
+    background-color: rgba(106, 163, 82, 0.808);
+}
