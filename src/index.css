@@ -410,3 +410,8 @@ color-legend {
     border: solid 1px rgb(77, 165, 39);
     background-color: rgba(106, 163, 82, 0.808);
 }
+
+.conternedorPanelIzquierdo {
+    padding-top: 54px;
+    background-color: #4f5050;
+}

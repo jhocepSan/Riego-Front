@@ -122,7 +122,7 @@ function HistogramaGlobal(props) {
         return Array.from({ length }, (_, i) => (start + i * step).toFixed(2));
     }
     useEffect(() => {
-        var colores = ['rgba(255, 255, 132, 1)', 'rgba(255, 0, 0, 1)', 'rgba(55, 99, 255, 1)',
+        var colores = ['#66ff66', '#a3c2c2', '#6666ff','#66ffff','#6666ff','#b366ff','#ffff66',
             'rgba(0, 255, 0, 1)', 'rgba(255, 255, 255, 1)', 'rgba(142, 41, 250, 1)', 'rgba(250, 107, 41, 1)',
             'rgba(41, 250, 244, 1)', 'rgba(250, 41, 228, 1)', 'rgba(158, 250, 41, 1)', 'rgba(175, 122, 197, 1)',
             'rgba(15, 156, 60, 1)', 'rgba(200, 60, 5, 1)', 'rgba(50, 50, 50, 1)', 'rgba(50, 49, 50, 1)']

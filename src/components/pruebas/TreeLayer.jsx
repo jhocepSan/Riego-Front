@@ -27,7 +27,9 @@ function TreeLayer(props) {
                     listaAx.push(layer)
                 }
             } else if (layer instanceof Image) {
-                listaAx.push(layer)
+                if(!['seleccion'].includes(layer.values_.text)){
+                    listaAx.push(layer)
+                }
             } else if (layer instanceof VectorLayer) {
                 listaAx.push(layer)
             }

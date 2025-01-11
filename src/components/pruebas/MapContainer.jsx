@@ -47,6 +47,7 @@ import OpcionesDescarga from './OpcionesDescarga.jsx';
 import OpcionesDescargaImages from './OpcionesDescargaImages.jsx';
 import VistaCatastral from './VistaCatastral.jsx';
 import PlanetApi from '../Sql/PlanetApi.js';
+import BuscarPredio from './BuscarPredio.jsx';
 const tipoWms = [
     {
         'id': '1_TRUE-COLOR', 'nombre': 'TRUE COLOR', 'idColection': 'cb8c3c95-4e41-4627-a380-01d4b8467621', "tipo": 'S', 'std': false, "fecha": true,
@@ -121,6 +122,7 @@ const listaDeforestada = [{ 'id': 1, 'nombre': 'Defo1', 'periodo': 'Enero-Febrer
 const filtrosAreaTra = [{ 'id': 1, 'nombre': 'Todos', 'valor': 'is_active=1 or is_active=0' }, { 'id': 2, 'nombre': 'Con Actividad', 'valor': 'is_active=1' }, { 'id': 3, 'nombre': 'Sin Actividad', 'valor': 'is_active=0' }]
 const fechasSalo = ["2022-12-31T20:00:00+00:00", "2021-12-31T20:00:00+00:00", "2020-12-31T20:00:00+00:00", "2019-12-31T20:00:00+00:00", "2018-12-31T20:00:00+00:00", "2017-12-31T20:00:00+00:00", "2016-12-31T20:00:00+00:00", "2015-12-31T20:00:00+00:00", "2014-12-31T20:00:00+00:00", "2013-12-31T20:00:00+00:00", "2012-12-31T20:00:00+00:00"];
 const anios = ['2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022']
+const filtroPrediosRiego = [{ 'id': 1, 'nombre': 'RIEGO ETAPA 1' }, { 'id': 2, 'nombre': 'RIEGO ETAPA 2' }, { 'id': 3, 'nombre': 'RIEGO ETAPA 3' }, { 'id': 4, 'nombre': 'RIEGO ETAPA 4' }, { 'id': 5, 'nombre': 'RIEGO ETAPA 5' }, { 'id': 6, 'nombre': 'RIEGO ETAPA 6' }]
 function MapContainer() {
     const refMapa = useRef();
     const { loading, setLoading, datosUser, tipoPagina } = useContext(ContextAplications);
@@ -209,7 +211,7 @@ function MapContainer() {
             })
         ],
         view: new View({
-            center:[-8031505.1551455455, -4390012.115152867],
+            center: [-8031505.1551455455, -4390012.115152867],
             zoom: 8,
             //maxZoom: 22,
             //minZoom: 0,
@@ -257,6 +259,9 @@ function MapContainer() {
     const [tipoGeometria, setTipoGeomatria] = useState(null);
     const [infoMapa, setInfoMapa] = useState(false);
     const [auxFechas, setAuxFechas] = useState([]);
+    const [listaGestiones, setListaGestiones] = useState([]);
+    const [filtroFundoRiego, setFiltroFundoRiego] = useState('RIEGO ETAPA 1');
+    const [filtroRiegoGestion,setFiltroRiegoGestion] = useState('RIEGOS TEMP 2018_2019');
     const tipoActivado = useRef(null);
     const geometriaAux = useRef(null);
     const activeSwiper = useRef(false);
@@ -452,7 +457,7 @@ function MapContainer() {
         return laye;
     }
     function obtenerWms(capa, nombre, lado) {
-        if(capa.id=='SWC'){
+        if (capa.id == 'SWC') {
             var fecha = fechaHum[numDia]
             activarCapaInicial(capa, fecha, nombre, lado)
         }
@@ -614,20 +619,20 @@ function MapContainer() {
             //console.log(selectTipoPredio);
             if (tipo == 'S') {
                 var fechaI = fechaHum[fechaHum.length - 1]
-                var fechaF = getFechaConvertIso(fechaHum[fechaHum.length - 1], 40).substring(0,10);
+                var fechaF = getFechaConvertIso(fechaHum[fechaHum.length - 1], 40).substring(0, 10);
                 console.log(fechaI, fechaF);
                 setFechasHum([]);
                 setAuxFechas(null);
                 setLoading(true);
-                obtenerFechas(selectTipoPredio,fechaI,fechaF);
+                obtenerFechas(selectTipoPredio, fechaI, fechaF);
             } else {
                 var fechaF = fechaHum[0]
-                var fechaI = getFechaConvertIso(fechaHum[0], -40).substring(0,10);
+                var fechaI = getFechaConvertIso(fechaHum[0], -40).substring(0, 10);
                 console.log(fechaI, fechaF);
                 setFechasHum([]);
                 setAuxFechas(null);
                 setLoading(true);
-                obtenerFechas(selectTipoPredio,fechaI,fechaF);
+                obtenerFechas(selectTipoPredio, fechaI, fechaF);
             }
         }
     }
@@ -705,7 +710,7 @@ function MapContainer() {
                 }
             })
     }
-    const obtenerFechas = async(tipo,fechaIni,fechaFin)=>{
+    const obtenerFechas = async (tipo, fechaIni, fechaFin) => {
         var parametros = {
             "tipoPredio": tipo.id,
             "fechaIni": fechaIni,
@@ -717,7 +722,7 @@ function MapContainer() {
             setAuxFechas(resultado.ok)
             setFechasHum(resultado.ok.map(item => item.fecha));
             setNumDia(resultado.ok.length - 1);
-            activarCapaInicial(tipo, resultado.ok[resultado.ok.length - 1].fecha,'Ortofoto','')
+            activarCapaInicial(tipo, resultado.ok[resultado.ok.length - 1].fecha, 'Ortofoto', '')
         }
     }
     const eventoClickMapa = (evt) => {
@@ -725,6 +730,12 @@ function MapContainer() {
         if (drawRefActive.current == false) {
             const viewResolution = /** @type {number} */ (mapRef.current.getView().getResolution());
             const url = getLayerText('Predios').getSource().getFeatureInfoUrl(
+                evt.coordinate,
+                viewResolution,
+                'EPSG:3857',
+                { 'INFO_FORMAT': 'application/json', 'FEATURE_COUNT': 1 }
+            );
+            const urlRiego = getLayerText('controlriego').getSource().getFeatureInfoUrl(
                 evt.coordinate,
                 viewResolution,
                 'EPSG:3857',
@@ -751,9 +762,12 @@ function MapContainer() {
                             setTipoPredio(saloWms[0].id);
                             setSelectFeature(true);
                             setSelectTipoPredio(saloWms[0]);
-                            setTituloModal("Estadisticas " + saloWms[0].nombre);
+                            setTituloModal("Estadisticas " + saloWms[0].nombre + ' ' + filtroFundoRiego);
                             setEsSalo(true);
-                            obtenerFechas(saloWms[0],'2024/11/01','2024/12/19')
+                            obtenerFechas(saloWms[0], '2024/11/01', '2024/12/19');
+                            var capa = getLayerText('seleccion');
+                            capa.getSource().updateParams({ CQL_FILTER: "gid=" + data.features[0].properties.gid });
+                            capa.setVisible(true);
                             /*if (tipoActivado.current == undefined || tipoActivado.current.indexOf('Defo') == -1) {
                                 obtenerImagenWms(data.features[0].geometry, '1_TRUE-COLOR', getFechaActual(-60), getFechaActual(0));
                                 tipoActivado.current = '1_TRUE-COLOR';
@@ -784,6 +798,15 @@ function MapContainer() {
                     .finally(() => { setLoading(false); }
                     );
             }
+            /*if(urlRiego && getLayerText('controlriego').getVisible()==true){
+                setLoading(true);
+                fetch(url)
+                    .then((res) => res.json())
+                    .then(data => {
+                        console.log(data)
+                    })
+                    .finally(()=>{setLoading(false);})
+            }*/
         }
     }
     const eventoMoveMapa = (evt) => {
@@ -858,24 +881,22 @@ function MapContainer() {
                 }
             })
         if (permisoModulo(2) == true) { }
-        if (false) {
-            fetch(`${serverUrl}/usuario/getSuscriptiones`, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json;charset=utf-8',
+        fetch(`${serverUrl}/predio/getGestionRiego`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json;charset=utf-8',
+            }
+        })
+            .then((res) => res.json())
+            .then(data => {
+                if (data.ok) {
+                    setListaGestiones(data.ok);
+                } else {
+                    MsgUtils.msgError(data.error);
+                    //console.log(data.error);
                 }
             })
-                .then((res) => res.json())
-                .then(data => {
-                    if (data.ok) {
-                        setListaSuscripciones(data.ok);
-                    } else {
-                        MsgUtils.msgError(data.error);
-                        //console.log(data.error);
-                    }
-                })
-        }
     }
     const busquedaDefinicion = () => {//lo cambio a otra vista
         var fechaIni = getFecha(new Date(), -400);
@@ -998,7 +1019,7 @@ function MapContainer() {
             //console.log(layer.getSource().getFeatures()[0].getGeometry().getType())
             poligono = { "type": layer.getSource().getFeatures()[0].getGeometry().getType(), "coordinates": layer.getSource().getFeatures()[0].getGeometry().getCoordinates() }
         } else {
-            poligono = { geometria, 'gid': infoPredio.gid};//parseInt(Math.random() * 100) }//
+            poligono = { geometria, 'gid': infoPredio.gid };//parseInt(Math.random() * 100) }//
         }
         return poligono;
     }
@@ -1030,6 +1051,7 @@ function MapContainer() {
                     url: "https://geon.forestryai.cl/geoserver/wms",
                     params: {
                         'LAYERS': 'cite:fundos_riego',
+                        CQL_FILTER: "c_dsc_faen='RIEGO ETAPA 1'",
                         transparent: true,
                         format: 'image/png', 'SRS': 'EPSG:3857'
                     },
@@ -1056,17 +1078,18 @@ function MapContainer() {
                     crossOrigin: 'anonymous'
                 })
             });
-            var capaDeforestacion = new Image({
-                text: 'Deforestacion',
-                title: 'Deforestación',
+            var capaSeleccion = new Image({
+                text: 'seleccion',
+                title: 'seleccion',
                 visible: false,
                 baseLayer: false,
+                preview: "limites.png",
                 source: new ImageWMS({
-                    url: "https://geo.forestryai.cl/geoserver/wms",
+                    url: "https://geon.forestryai.cl/geoserver/wms",
                     params: {
-                        'LAYERS': 'cite:deforestacion',
+                        'LAYERS': 'cite:fundos_riego_seleccion',
                         transparent: true,
-                        format: 'image/png', 'SRS': 'EPSG:900913'
+                        format: 'image/png', 'SRS': 'EPSG:3857'
                     },
                     ratio: 1,
                     serverType: 'geoserver',
@@ -1090,15 +1113,15 @@ function MapContainer() {
                     crossOrigin: 'anonymous'
                 })
             })
-            var capaCatastrales = new Image({
-                text: 'Catastrales',
-                title: 'Predios Catastrales',
+            var capaControlRiego = new Image({
+                text: 'controlriego',
+                title: 'Control Riego',
                 visible: false,
                 baseLayer: false,
                 source: new ImageWMS({
-                    url: "https://geo.forestryai.cl/geoserver/wms",
+                    url: "https://geon.forestryai.cl/geoserver/wms",
                     params: {
-                        'LAYERS': 'cite:in_predios_catastrales',
+                        'LAYERS': 'cite:ri_control_riego',
                         transparent: true,
                         format: 'image/png', 'SRS': 'EPSG:900913'
                     },
@@ -1107,15 +1130,15 @@ function MapContainer() {
                     crossOrigin: 'anonymous'
                 })
             })
-            var capaTrabajadas = new Image({
-                text: 'Trabajadas',
-                title: 'Trabajadas/no Trabajadas',
+            var capaTipoSuelo = new Image({
+                text: 'tiposuelo',
+                title: 'Tipo Suelo',
                 visible: false,
                 baseLayer: false,
                 source: new ImageWMS({
-                    url: "https://geo.forestryai.cl/geoserver/wms",
+                    url: "https://geon.forestryai.cl/geoserver/wms",
                     params: {
-                        'LAYERS': 'cite:in_trabajadas_1',
+                        'LAYERS': 'cite:ri_tipo_suelo',
                         transparent: true,
                         format: 'image/png', 'SRS': 'EPSG:900913'
                     },
@@ -1186,8 +1209,9 @@ function MapContainer() {
             mapa.addLayer(capaCultivos);
             mapa.addLayer(asignacion_roce);
             mapa.addLayer(canalesRiego);
-            //mapa.addLayer(capaDeforestacion);
-            //mapa.addLayer(capaCatastrales);
+            mapa.addLayer(capaSeleccion);
+            mapa.addLayer(capaControlRiego);
+            mapa.addLayer(capaTipoSuelo);
             //mapa.addLayer(capaTrabajadas);
             //mapa.addLayer(capaSoya);
             //mapa.addLayer(capaAreasInra);
@@ -2311,8 +2335,8 @@ function MapContainer() {
                 console.log(tipo)
                 var parametros = {
                     "tipoPredio": "SWC",
-                    "fechaIni": "2024/11/01",
-                    "fechaFin": "2024/12/19"
+                    "fechaIni": "2024/12/19",
+                    "fechaFin": "2025/01/19"
                 }
                 var resultado = await PlanetApi.getFechasImagen(parametros)
                 if (resultado.ok) {
@@ -2326,7 +2350,8 @@ function MapContainer() {
                     setTituloModal(`Estadisticas Contenido Agua en el Suelo`);
                     setTipoPredio(tipo.id);
                     setSelectTipoPredio(tipo);
-                    activarCapaInicial(tipo, resultado.ok[resultado.ok.length - 1].fecha,'Ortofoto','')
+                    activarCapaInicial(tipo, resultado.ok[resultado.ok.length - 1].fecha, 'Ortofoto', '');
+                    filtraarPrediosRiego('RIEGO ETAPA 1')
                     tipoActivado.current = tipo.id;
                     mapa.getView().setCenter([-8049850.041933985, -4457582.448156962])
                     mapa.getView().setZoom(12);
@@ -2341,6 +2366,56 @@ function MapContainer() {
             }
         }
     }
+    function filtraarPrediosRiego(valor) {
+        setFiltroFundoRiego(valor);
+        var capa = getLayerText('Predios');
+        capa.getSource().updateParams({ CQL_FILTER: "c_dsc_faen='" + valor + "' and c_dsc_agru='"+filtroRiegoGestion+"'" });
+        capa.setVisible(true);
+        var capaSeleccion = getLayerText('seleccion');
+        capaSeleccion.setVisible(false);
+        mapa.changed()
+        mapa.getView().setZoom(8);
+    }
+    function filtrarGestion(valor){
+        var capa = getLayerText('Predios');
+        setFiltroRiegoGestion(valor);
+        capa.getSource().updateParams({CQL_FILTER:"c_dsc_faen='"+filtroFundoRiego+"' and c_dsc_agru='"+valor+"'"});
+        capa.setVisible(true);
+        var capaSeleccion = getLayerText('seleccion');
+        capaSeleccion.setVisible(false);
+        mapa.changed()
+        mapa.getView().setZoom(8);
+    }
+    function actividadPanelBusqueda(val,objeto){
+        if(val==0){
+            setActivarDivisor(false);
+        }else if(val==1){
+            var cordenadas = JSON.parse(objeto.geometria);
+            var datosPoligono = {
+                "type": "FeatureCollection",
+                "name": "geometria_salo_inra",
+                "crs": {
+                    "type": "name",
+                    "properties": {
+                        "name": "urn:ogc:def:crs:EPSG::3857"
+                    }
+                },
+                "features": [{
+                    "type": "Feature",
+                    "geometry": cordenadas
+                }]
+            }
+            var vectorSource = new VectorDraw({
+                features: new GeoJSON().readFeatures(datosPoligono),
+            });
+            var capa = getLayerText('seleccion');
+            capa.getSource().updateParams({ CQL_FILTER: "gid=" + objeto.gid });
+            capa.setVisible(true);
+            mapa.getView().setCenter([objeto.x, objeto.y])
+            mapa.getView().fit(vectorSource.getExtent(),{size:mapa.getSize()})
+            
+        }
+    }
     useEffect(() => {
         if (viewP == false) {
             setViewP(true);
@@ -2352,12 +2427,13 @@ function MapContainer() {
         <>
             <div className='container-fluid w-100'>
                 <div className={`row ${activarDivisor == false ? 'row-cols-1' : 'row-cols-2'} `}>
-                    <div className='col m-0 p-0' style={{ width: `${activarDivisor == true ? '85%' : '100%'}` }}>
+                    <div className='col m-0 p-0' style={{ width: `${activarDivisor == true ? '60%' : '100%'}` }}>
                         <div ref={refMapa} className={getClaseMapa()} ></div>
                     </div>
-                    <div className='col m-0 p-0' style={{ width: `${activarDivisor == true ? '15%' : '0%'}` }}>
-
-                    </div>
+                    {activarDivisor==true&&
+                    <div className='col m-0 p-0' style={{ width: `${activarDivisor == true ? '40%' : '0%'}` }}>
+                        <BuscarPredio collback={(val,objeto)=>actividadPanelBusqueda(val,objeto)}/>
+                    </div>}
                 </div>
             </div>
             {mostrarLeyenda == true && datosUser.leyendaImgHd == 1 && <div className={`alert alert-light m-1 p-0 ${getPosicionLegenda()}`} >
@@ -2371,10 +2447,10 @@ function MapContainer() {
                 title='boton Swipe' onClick={() => eventoSwipe()}>
                 <img src='swipe.png' className='imgMapa' id='imgSwipe' />
             </button>
-            <button className='btn m-0 p-1 btnLegend btFlotanteMenu btnMapaR'
+            {activarDivisor==false&&<button className='btn m-0 p-1 btnLegend btFlotanteMenu btnMapaR'
                 title='Boton Legenda' onClick={() => activarLegenda()}>
                 <img src='legend.png' className='imgMapa' id='imgLegend' />
-            </button>
+            </button>}
             <button className='btn m-0 p-1 btnAreaInra btFlotanteMenu btnMapaR d-none'
                 title='Areas Inra' onClick={() => activarInfoAreaInra()}>
                 <img src='areasInra.png' className='imgMapa' id='imgAreaInra' />
@@ -2420,8 +2496,6 @@ function MapContainer() {
                 title='Información del Mapa' onClick={() => activarInfoMapa()}>
                 <img src='infoMapa.png' className='imgMapa' id='imgInfoMap' ></img>
             </button>
-            <button className='btn btn-light btFlotantePr fs-4 btn-sm d-none' disabled={showTree} onClick={() => busquedaDefinicion()}>☘</button>
-            <button className='btn btn-primary btFlotantePr2 fs-4 btn-sm d-none' disabled={showTree} onClick={() => busquedaDefinicionSky()}>⛯</button>
             <div className='treContenido'>
                 <Collapse in={showTree} dimension="width">
                     <div id="example-collapse-text" className='container-fluid colorFondoModal2 py-1'>
@@ -2571,6 +2645,25 @@ function MapContainer() {
                                     onClick={() => cambiarCaroucel(false)}>
                                     <img src='/btnCaroucel.png' className='btnRotar' width='25'></img>
                                 </button>
+                                <div className='input-group input-group-sm'>
+                                    <span className="input-group-text bg-transparent text-light fw-bold" style={{ border: 'none' }}>Gestión</span>
+                                    <select className="form-select form-select-sm" 
+                                        id='selectGestion'
+                                        onChange={(e) => filtrarGestion(e.target.value)}>
+                                        {listaGestiones.map((item, index) => {
+                                            return (<option value={item.nombre} key={index}>{item.nombre}</option>)
+                                        })}
+                                    </select>
+                                </div>
+                                <div className="input-group input-group-sm">
+                                    <span className="input-group-text bg-transparent text-light fw-bold" style={{ border: 'none' }}>Faena</span>
+                                    <select className="form-select form-select-sm" id='selectFaena'
+                                        onChange={(e) => filtraarPrediosRiego(e.target.value)}>
+                                        {filtroPrediosRiego.map((item, index) => {
+                                            return (<option value={item.nombre} key={index}>{item.nombre}</option>)
+                                        })}
+                                    </select>
+                                </div>
                             </div>
                         </div>
                         <div className='col my-auto' >
@@ -2647,18 +2740,18 @@ function MapContainer() {
                                         }
                                     }}>
                                     <i className="fa-solid fa-chart-simple"></i></button>}
-                                {selectFeature==true && esSalo == true && <button className='btn btn-info btn-sm' id='btnShowInfo'
+                                {selectFeature == true && esSalo == true && <button className='btn btn-info btn-sm' id='btnShowInfo'
                                     title='Mostrar Información del predio Seleccionado'
                                     disabled={selectFeature ? false : true}
-                                    onClick={() => { setTipoModal('I'); setTituloModal('Información Predio'); setShowModal(true) }}><i className="fa-solid fa-circle-info"></i></button>}
-                                {false &&
-                                    <button className='btn botonOscuro btn-sm'
-                                        title='Buscar un predio'
-                                        //disabled={selectFeature ? false : true}
-                                        onClick={() => { setTipoModal('B'); setTituloModal('Buscar Predio'); setShowModal(true) }}>
-                                            <i className="fa-solid fa-magnifying-glass-location"></i></button>}
-                                
-                                {false&&<button className={`btn btn-sm mx-0 px-0 ${indexCarousel < 1 ? '' : 'd-none'}`}
+                                    onClick={() => { setTipoModal('I'); setTituloModal('Información de la Faena'); setShowModal(true) }}>
+                                        <i className="fa-solid fa-circle-info"></i></button>}
+                                <button className='btn botonOscuro btn-sm'
+                                    title='Buscar un predio'
+                                    //disabled={selectFeature ? false : true}
+                                    onClick={() => { setActivarDivisor(true) }}>
+                                    <i className="fa-solid fa-magnifying-glass-location"></i>
+                                </button>
+                                {false && <button className={`btn btn-sm mx-0 px-0 ${indexCarousel < 1 ? '' : 'd-none'}`}
                                     title='Ir al siguiente panel'
                                     onClick={() => cambiarCaroucel(true)}>
                                     <img src='/btnCaroucel.png' width='25'></img>
@@ -2858,10 +2951,6 @@ function MapContainer() {
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <th>Id</th>
-                                        <td>{infoPredio.gid}</td>
-                                    </tr>
-                                    <tr>
                                         <th>Codigo Fundo</th>
                                         <td>{infoPredio.n_cod_fund}</td>
                                     </tr>
@@ -2870,12 +2959,24 @@ function MapContainer() {
                                         <td>{infoPredio.n_cod_roda}</td>
                                     </tr>
                                     <tr>
-                                        <th>Nombre Fundo</th>
+                                        <th>Nombre</th>
                                         <td>{infoPredio.c_nom_fund}</td>
                                     </tr>
                                     <tr>
+                                        <th>Faena</th>
+                                        <td>{infoPredio.c_dsc_faen}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>UPF</th>
+                                        <td>{infoPredio.n_id}</td>
+                                    </tr>
+                                    <tr>
                                         <th>Area (has)</th>
-                                        <td>{parseInt(infoPredio.area).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</td>
+                                        <td>{parseInt(infoPredio.f_sup_ha_u).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Id</th>
+                                        <td>{infoPredio.gid}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -2890,7 +2991,7 @@ function MapContainer() {
                                 var nombre = saloWms.filter(item => item.id == tipoPredio)[0]
                                 setSelectFeature(true);
                                 setSelectTipoPredio(nombre)
-                                setTituloModal("Estadisticas " + nombre.nombre)
+                                setTituloModal("Estadisticas " + nombre.nombre + ' ' + filtroFundoRiego)
                                 setTipoModal('E');
                                 setShowModal(true);
                             }}>Ver estadisticas</button>}
