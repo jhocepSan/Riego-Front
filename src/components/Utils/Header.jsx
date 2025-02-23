@@ -21,7 +21,7 @@ function Header() {
                     </div>
                     <div className="dropdown dropend">
                         <a className="btn btn-sm dropdown-toggle" role="button" id="MenuOptiones" data-bs-toggle="dropdown" aria-expanded="false">
-                            <img src='/cmpc.jpeg' width="100" height="42" className=" my-auto card-img-left  imgUser" />
+                            <img src='/logo-cmpc.png' width="100" height="42" className=" my-auto card-img-left  imgUser" />
                         </a>
                         <ul className="dropdown-menu bg-light bg-gradient" aria-labelledby="MenuOptiones">
                             <li><a className="dropdown-item btn btn-sm fw-bold" onClick={() => cambiarVentana('7', 'Cambiar Credenciales')}>Cambiar Usuario/Contraseña</a></li>

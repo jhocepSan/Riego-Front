@@ -130,9 +130,9 @@ function HistogramaUnidad(props) {
         var label = []
         var data = []
         if (tipoPredio == 'SWC') {
-            label = generateList(0.05,1.0,0.05).slice(1);
+            label = generateList(0.00,1.0,0.05).slice(1);
             var listaElegida = Object.values(selectItem);
-            data = listaElegida.slice(3)
+            data = listaElegida.slice(3).map(item=>parseFloat(item).toFixed(2))
         } else if (tipoPredio == 'CONOPY_HEIGH') {
             label = selectItem.valores.map((item) => `${item.highEdge}`)
             data = selectItem.valores.map((item) => parseInt(item.count) * (30 * 30) / 10000)
@@ -149,24 +149,6 @@ function HistogramaUnidad(props) {
             label = selectItem.valores.map((item) => `${item.highEdge.toFixed(2)}`)
             data = selectItem.valores.map((item) => parseInt(item.count) * (6.06) / 10000)
         }
-        /*const suma = data.reduce((acumulador, valorActual) => acumulador + valorActual, 0);
-        console.log(suma, "Area total ???")
-        const sumaCount = selectItem.valores.map((item) => parseInt(item.count)).reduce((acumulador, valorActual) => acumulador + valorActual, 0);
-        console.log(sumaCount, "Area cantidad pixeles???")
-        const backgroundColors = data.map((item) => {
-            var i = 0;
-            for (var color of info.rangocolores) {
-                if (item == color[0]) {
-                    return rgbToString(hexToRgb(color[1]))
-                } else if (item > color[0]) {
-                    const factor = item / info.rangocolores[i - 1][0];
-                    const colore = interpolateColor(hexToRgb(color[1]), hexToRgb(info.rangocolores[i - 1][1]), factor); // Interpolar el color
-                    return rgbToString(colore);
-                }
-                i += 1;
-            }
-
-        });*/
 
         setData(
             {
@@ -185,7 +167,7 @@ function HistogramaUnidad(props) {
         );
     }, [selectItem])
     return (
-        <Bar options={options} data={data} />
+        <Bar options={options} data={data} height='170px'/>
     )
 }
 

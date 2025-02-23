@@ -97,9 +97,15 @@ const tipoWms = [
 const saloWms = [
     {
         'id': 'SWC', 'nombre': 'CONTENIDO AGUA EN EL SUELO', 'idColection': '3af9a995-c7e0-4e82-8b1c-a6db5191bd2f', "tipo": 'A', 'std': true,
-        "fecha": true, 'idVisual': 'c74e116b-b8bc-499d-abd1-2d1b615f74cf', 'histo': true, "histog": true,
+        "fecha": true, 'capaUPF': 'cite:fundos_riego', 'capaUTB': 'cite:ri_utbs_riego', 'histo': true, "histog": true,
+        "rangocolores": [[1.0, '003492'], [0.95, '00478f'], [0.9, '00558d'], [0.85, '00618c'], [0.8, '006d8a'], [0.75, '007788'], [0.7, '008186'], [0.65, '008a85'], [0.6, '009383'], [0.55, '269c83'], [0.5, '4da484'], [0.45, '68ac86'], [0.4, '80b48a'], [0.35, '96bc90'], [0.3, 'aac398'], [0.25, 'bdcba3'], [0.2, 'ced3af'], [0.15, 'dedcbd'], [0.1, 'ede4cb'], [0.05, 'faedda'], [0.0, 'fff7ea'], [-5, 'faf6f0']]
+    },
+    {
+        'id': 'TEMP', 'nombre': 'TEMPERATURA DE LA SUPERFICIE', 'idColection': '3af9a995-c7e0-4e82-8b1c-a6db5191bd2f', "tipo": 'A', 'std': true,
+        "fecha": true, 'capaUPF': 'cite:upfs_temperatura', 'capaUTB': 'cite:utbs_temperatura', 'histo': true, "histog": true,
         "rangocolores": [[1.0, '003492'], [0.95, '00478f'], [0.9, '00558d'], [0.85, '00618c'], [0.8, '006d8a'], [0.75, '007788'], [0.7, '008186'], [0.65, '008a85'], [0.6, '009383'], [0.55, '269c83'], [0.5, '4da484'], [0.45, '68ac86'], [0.4, '80b48a'], [0.35, '96bc90'], [0.3, 'aac398'], [0.25, 'bdcba3'], [0.2, 'ced3af'], [0.15, 'dedcbd'], [0.1, 'ede4cb'], [0.05, 'faedda'], [0.0, 'fff7ea'], [-5, 'faf6f0']]
     }]
+const timeSolar = [{ 'id': 'TEMP', 'nombre': 'Medio Dia' }, { 'id': 'TEMP2', 'nombre': 'Media Noche' }]
 const baseVariPla = [
     { 'id': '&proc=rgb', 'nombre': 'RGB' },
     { 'id': '&proc=cir', 'nombre': 'CIR' },
@@ -119,7 +125,9 @@ const listaDeforestada = [{ 'id': 1, 'nombre': 'Defo1', 'periodo': 'Enero-Febrer
 { 'id': 7, 'nombre': 'Defo7', 'periodo': 'Julio-Agosto' },
 { 'id': 8, 'nombre': 'Defo8', 'periodo': 'Agosto-Septiembre' }
 ]
-const filtrosAreaTra = [{ 'id': 1, 'nombre': 'Todos', 'valor': 'is_active=1 or is_active=0' }, { 'id': 2, 'nombre': 'Con Actividad', 'valor': 'is_active=1' }, { 'id': 3, 'nombre': 'Sin Actividad', 'valor': 'is_active=0' }]
+const filtrosCapas = [{ 'id': 1, 'nombre': 'UPF', 'capa': 'Predios', 'capaselc': 'seleccion' },
+{ 'id': 2, 'nombre': 'Paños', 'capa': 'panio', 'capaselc': 'seleccionA' },
+{ 'id': 3, 'nombre': 'UTBs', 'capa': 'utb', 'capaselc': 'seleccionB' }]
 const fechasSalo = ["2022-12-31T20:00:00+00:00", "2021-12-31T20:00:00+00:00", "2020-12-31T20:00:00+00:00", "2019-12-31T20:00:00+00:00", "2018-12-31T20:00:00+00:00", "2017-12-31T20:00:00+00:00", "2016-12-31T20:00:00+00:00", "2015-12-31T20:00:00+00:00", "2014-12-31T20:00:00+00:00", "2013-12-31T20:00:00+00:00", "2012-12-31T20:00:00+00:00"];
 const anios = ['2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022']
 const filtroPrediosRiego = [{ 'id': 1, 'nombre': 'RIEGO ETAPA 1' }, { 'id': 2, 'nombre': 'RIEGO ETAPA 2' }, { 'id': 3, 'nombre': 'RIEGO ETAPA 3' }, { 'id': 4, 'nombre': 'RIEGO ETAPA 4' }, { 'id': 5, 'nombre': 'RIEGO ETAPA 5' }, { 'id': 6, 'nombre': 'RIEGO ETAPA 6' }]
@@ -261,7 +269,8 @@ function MapContainer() {
     const [auxFechas, setAuxFechas] = useState([]);
     const [listaGestiones, setListaGestiones] = useState([]);
     const [filtroFundoRiego, setFiltroFundoRiego] = useState('RIEGO ETAPA 1');
-    const [filtroRiegoGestion,setFiltroRiegoGestion] = useState('RIEGOS TEMP 2018_2019');
+    const [filtroRiegoGestion, setFiltroRiegoGestion] = useState('RIEGOS TEMP 2024_2025');
+    const [nivelCapa, setNivelCapa] = useState(1);
     const tipoActivado = useRef(null);
     const geometriaAux = useRef(null);
     const activeSwiper = useRef(false);
@@ -277,8 +286,8 @@ function MapContainer() {
     const helpToolTip = useRef();
     const measureToolTip = useRef();
     const drawRefActive = useRef(false);
-    function agregarNewCapa(capa, nombre, poligono, lado) {
-        //console.log(capa, nombre, poligono, lado)
+    /*function agregarNewCapa(capa, nombre, poligono, lado) {
+
         try {
             var fechaI = getFechaConvert(fechas[numDia], 0);
             var fechaF = getFechaConvert(fechas[numDia], 10);
@@ -420,7 +429,7 @@ function MapContainer() {
             layerCapaSalo.setVisible(true);
         }
         mapa.changed();
-    }
+    }*/
     function modificarUrl(fecha, laye) {
         mapa.getLayers().forEach(function (layer) {
             if (layer instanceof TileLayer) {
@@ -429,7 +438,7 @@ function MapContainer() {
                 }
             } else if (layer instanceof Image) {
                 if (layer.values_.text == laye) {
-                    console.log(laye)
+
                     layer.getSource().updateParams({ "LAYERS": fecha })
                 }
             }
@@ -457,7 +466,7 @@ function MapContainer() {
         return laye;
     }
     function obtenerWms(capa, nombre, lado) {
-        if (capa.id == 'SWC') {
+        if (capa.id == 'SWC' || capa.id == 'TEMP') {
             var fecha = fechaHum[numDia]
             activarCapaInicial(capa, fecha, nombre, lado)
         }
@@ -486,15 +495,15 @@ function MapContainer() {
                     setAuxFechas(infor.map(item => item.interval))
                     setFechasHum(infor.map(item => item.interval.from));
                     var fechaFin = new Date().getTime();
-                    //console.log(fechaFin - fechaInif)
+
                 } else {
-                    //console.log(data.error);
+
                     MsgUtils.msgError(data.error);
                 }
             })
     }
     function obtenerWmsInicial(dato, nombre, geometri, dateFecha) {
-        //console.log(geometri);
+
         var geo = "POLYGON (("
         for (var i of geometri.coordinates[0][0]) {
             geo += i[0] + " " + i[1] + ","
@@ -535,16 +544,16 @@ function MapContainer() {
             var fechaf = getFechaConvert(fechas[valor], 10)
             modificarUrl(fechaa + "/" + fechaf, 'sentinel');
         } else {
-            if (tipoPredio != 'SWC') {
-                var fechaa = getFechaConvert(fechaHum[valor], 0)
-                var fechaf = getFechaConvert(fechaHum[valor], 10)
-                modificarUrl(fechaa + "/" + fechaf, 'salo');
-            } else {
-                var fechaa = auxFechas[valor]
-                var fechaNumerica = 'cite:' + getFechaNumerica(fechaa.fecha, 0) + '_swc'
-                console.log(fechaNumerica)
-                modificarUrl(fechaNumerica, 'Ortofoto');
+            var fechaa = auxFechas[valor];
+            var fechaNumerica=''
+            if (tipoPredio =='TEMP') {
+                fechaNumerica = 'cite:' + getFechaNumerica(fechaa.fecha, 0) + '_1330_tem'
+            } else if(tipoPredio =='TEMP2'){
+                fechaNumerica = 'cite:' + getFechaNumerica(fechaa.fecha, 0) + '_0130_tem'
+            }else if(tipoPredio == 'SWC') {
+                fechaNumerica = 'cite:' + getFechaNumerica(fechaa.fecha, 0) + '_swc'
             }
+            modificarUrl(fechaNumerica, 'Ortofoto');
         }
     }
     function nuevaSuscription(geometry) {
@@ -558,8 +567,8 @@ function MapContainer() {
             },
             body: JSON.stringify({ fechaIni, fechaFin, geometry })
         }).then((res) => res.json())
-        //.then(data => { console.log(data) })
-        //.catch(error => console.log(error))
+        //.then(data => { 
+        //.catch(error => 
     }
     function obtenerInfoCollectionS(id, tipo) {
         if (tipo == 'A') {
@@ -576,51 +585,32 @@ function MapContainer() {
         setNumDia(fechasSalo.length - 1);
         setFechasHum(fechasSalo.reverse());
         setLoading(false);
-        /*fetch(`${serverUrl}/sentinelap/getInfoPredio`, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json;charset=utf-8',
-            },
-            body: JSON.stringify({ geometria: geometry, 'id': id })
-        })
-            .then((res) => res.json())
-            .then(data => {
-                if (data.ok) {
-                    if (tipo == 'A') {
-                        //console.log("contenido del agua")
-                    } else {
-                        //console.log("informacion salo")
-                    }
-                    //console.log(data.ok);
-                    setFechasHum(data.ok);
-                    //setFechasHum(data.ok);
-
-                } else {
-                    MsgUtils.msgError(data.error);
-                }
-                setLoading(false);
-            })*/
     }
     function obtenerFecha(tipo) {
         if (tipoPredio != 'SWC') {
             if (tipo == 'S') {
-                var fechaI = fechas[fechas.length - 1]
-                var fechaF = getFechaConvert(fechas[fechas.length - 1], 60);
+                var fechaI = fechaHum[fechaHum.length - 1]
+                var fechaF = getFechaConvertIso(fechaHum[fechaHum.length - 1], 15).substring(0, 10);
+
+                setFechasHum([]);
+                setAuxFechas(null);
                 setLoading(true);
-                obtenerImagenWms(geometria, '', fechaI, fechaF);
+                obtenerFechas(selectTipoPredio, fechaI, fechaF);
             } else {
-                var fechaF = fechas[0]
-                var fechaI = getFechaConvert(fechas[0], -60);
+                var fechaF = fechaHum[0]
+                var fechaI = getFechaConvertIso(fechaHum[0], -15).substring(0, 10);
+
+                setFechasHum([]);
+                setAuxFechas(null);
                 setLoading(true);
-                obtenerImagenWms(geometria, '', fechaI, fechaF);
+                obtenerFechas(selectTipoPredio, fechaI, fechaF);
             }
         } else {
-            //console.log(selectTipoPredio);
+
             if (tipo == 'S') {
                 var fechaI = fechaHum[fechaHum.length - 1]
                 var fechaF = getFechaConvertIso(fechaHum[fechaHum.length - 1], 40).substring(0, 10);
-                console.log(fechaI, fechaF);
+
                 setFechasHum([]);
                 setAuxFechas(null);
                 setLoading(true);
@@ -628,7 +618,7 @@ function MapContainer() {
             } else {
                 var fechaF = fechaHum[0]
                 var fechaI = getFechaConvertIso(fechaHum[0], -40).substring(0, 10);
-                console.log(fechaI, fechaF);
+
                 setFechasHum([]);
                 setAuxFechas(null);
                 setLoading(true);
@@ -637,7 +627,7 @@ function MapContainer() {
         }
     }
     function obtenerImagenWms(geometria, tipo, fechaI, fechaF) {
-        //console.log(fechaI, fechaF)
+
         fetch(`${serverUrl}/sentinelap/getInfoPredio`, {
             method: 'POST',
             headers: {
@@ -648,7 +638,7 @@ function MapContainer() {
         })
             .then((res) => res.json())
             .then(data => {
-                //console.log(data)
+
                 if (data.ok) {
                     if (data.ok.length != 0) {
                         setSelectFeature(true);
@@ -700,7 +690,7 @@ function MapContainer() {
             .then((res) => res.json())
             .then(data => {
                 if (data.ok) {
-                    //console.log(data.ok)
+
                     var lista = JSON.parse(data.ok).map(item => parseFloat(item.area));
                     let total = lista.reduce((a, b) => a + b, 0);
                     setInfoDefo({ 'data': JSON.parse(data.ok), 'areaTotal': total });
@@ -718,7 +708,7 @@ function MapContainer() {
         }
         var resultado = await PlanetApi.getFechasImagen(parametros)
         if (resultado.ok) {
-            console.log(resultado.ok)
+
             setAuxFechas(resultado.ok)
             setFechasHum(resultado.ok.map(item => item.fecha));
             setNumDia(resultado.ok.length - 1);
@@ -726,10 +716,12 @@ function MapContainer() {
         }
     }
     const eventoClickMapa = (evt) => {
-        console.log(evt.coordinate);
+
         if (drawRefActive.current == false) {
             const viewResolution = /** @type {number} */ (mapRef.current.getView().getResolution());
-            const url = getLayerText('Predios').getSource().getFeatureInfoUrl(
+            var capaNivel = filtrosCapas.filter((item) => item.id == document.getElementById('selectNivelCapa').value)[0];
+
+            const url = getLayerText(capaNivel.capa).getSource().getFeatureInfoUrl(
                 evt.coordinate,
                 viewResolution,
                 'EPSG:3857',
@@ -741,11 +733,12 @@ function MapContainer() {
                 'EPSG:3857',
                 { 'INFO_FORMAT': 'application/json', 'FEATURE_COUNT': 1 }
             );
-            if (url && getLayerText('Predios').getVisible() == true) {
+            if (url && getLayerText(capaNivel.capa).getVisible() == true) {
                 setLoading(true);
                 fetch(url)
                     .then((res) => res.json())
                     .then(data => {
+                        console.log(data)
                         if (data.features.length != 0) {
                             var features = new VectorDraw({
                                 features: new GeoJSON().readFeatures(data, {
@@ -759,37 +752,20 @@ function MapContainer() {
                             setInfoPredio(data.features[0].properties);
                             setGeometria(data.features[0].geometry);
                             geometriaAux.current = data.features[0].geometry;
-                            setTipoPredio(saloWms[0].id);
+                            if (tipoActivado.current != 'TEMP') {
+                                setTipoPredio(saloWms[0].id);
+                                setSelectTipoPredio(saloWms[0]);
+                            }
                             setSelectFeature(true);
-                            setSelectTipoPredio(saloWms[0]);
-                            setTituloModal("Estadisticas " + saloWms[0].nombre + ' ' + filtroFundoRiego);
+                            setTituloModal("Estadísticas " + saloWms[0].nombre + ' ' + filtroFundoRiego);
                             setEsSalo(true);
-                            obtenerFechas(saloWms[0], '2024/11/01', '2024/12/19');
-                            var capa = getLayerText('seleccion');
+                            (tipoActivado.current == null) ? obtenerFechas(saloWms[0], '2024/11/01', '2024/12/19') : '';
+                            var capa = getLayerText(capaNivel.capaselc);
                             capa.getSource().updateParams({ CQL_FILTER: "gid=" + data.features[0].properties.gid });
                             capa.setVisible(true);
-                            /*if (tipoActivado.current == undefined || tipoActivado.current.indexOf('Defo') == -1) {
-                                obtenerImagenWms(data.features[0].geometry, '1_TRUE-COLOR', getFechaActual(-60), getFechaActual(0));
-                                tipoActivado.current = '1_TRUE-COLOR';
-                                setSelectTipoPredio(tipoWms[0]);
-                                setTipoPredio(tipoWms[0].id);
-                                setTituloModal("Imagenes " + tipoWms[0].nombre);
-                            } else {
-                                if (tipoActivado.current.indexOf('Defo') >= 0) {
-                                    //getInfoAreaDeforestada(data.features[0].geometry,tipoPredio);
-                                    if (document.getElementById('btnShowInfo') != null) {
-                                        document.getElementById('btnShowInfo').click();
-                                    } else {
-                                        setTipoModal('I'); setTituloModal('Información Predio'); setShowModal(true);
-                                        document.getElementById('showInfoAreaDefo').click();
-                                    }
-                                }
-                            }*/
-                            //nuevaSuscription(data.features[0].geometry);
-                            //setLoading(false);
                         } else {
                             setTipoGeomatria(null);
-                            //console.log("dato")
+
                             //MsgUtils.msgError("Realize el click en un predio, por favor !");
                             setLoading(false);
                         }
@@ -803,7 +779,7 @@ function MapContainer() {
                 fetch(url)
                     .then((res) => res.json())
                     .then(data => {
-                        console.log(data)
+                        
                     })
                     .finally(()=>{setLoading(false);})
             }*/
@@ -813,7 +789,7 @@ function MapContainer() {
         var punto = proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326')
         document.getElementById('latitudMapa').innerHTML = 'lat: ' + punto[1].toFixed(4);
         document.getElementById('longitudMapa').innerHTML = ' long: ' + punto[0].toFixed(4);
-        ////console.log(mapa.getView().getZoom())
+
         if (evt.dragging) {
             return;
         }
@@ -831,7 +807,7 @@ function MapContainer() {
                 }
                 if (feature) {
                     overlowCapaRef.current.getSource().addFeature(feature);
-                    //console.log(feature.getProperties());
+
                 }
                 overloadFeatureSelect.current = feature;
             }
@@ -852,7 +828,7 @@ function MapContainer() {
             .then((res) => res.json())
             .then(data => {
                 if (data.ok) {
-                    console.log(data.ok)
+
                     var listaBaseMap = data.ok.filter(item => item.name.includes('planet_medres_normalized_analytic'))
                     setSliderMap(listaBaseMap);
                     var valores = [...new Set(listaBaseMap.map(item => item.name.split('_')[4].split('-')[0]))]
@@ -860,7 +836,7 @@ function MapContainer() {
                     setSelectGestion(valores[valores.length - 1])
                 } else {
                     MsgUtils.msgError(data.error);
-                    //console.log(data.error);
+
                 }
             })
         fetch(`${serverUrl}/usuario/fieldTabla`, {
@@ -877,7 +853,7 @@ function MapContainer() {
                     setFieldTablaCapa(data.ok);
                 } else {
                     MsgUtils.msgError(data.error);
-                    //console.log(data.error);
+
                 }
             })
         if (permisoModulo(2) == true) { }
@@ -891,75 +867,43 @@ function MapContainer() {
             .then((res) => res.json())
             .then(data => {
                 if (data.ok) {
-                    setListaGestiones(data.ok);
+                    setListaGestiones(data.ok.reverse());
                 } else {
                     MsgUtils.msgError(data.error);
-                    //console.log(data.error);
-                }
-            })
-    }
-    const busquedaDefinicion = () => {//lo cambio a otra vista
-        var fechaIni = getFecha(new Date(), -400);
-        var fechaFin = getFecha(new Date(), 0);
-        var newGeo = {
-            "geometry": geometria, "properties": {
-                "crs": "http://www.opengis.net/def/crs/EPSG/0/3857"
-            }
-        }
-        //console.log(newGeo)
-        fetch(`${serverUrl}/sentinelap/createSuscripcionHumedadSuelo`, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json;charset=utf-8',
-            },
-            body: JSON.stringify({ 'geometria': newGeo, 'fechaini': fechaIni, 'fechafin': fechaFin })
-        })
-            .then((res) => res.json())
-            .then(data => {
-                if (data.ok) {
-                    //console.log(data.ok);
-                } else {
-                    //console.log(data.error);
-                }
-            })
-    }
-    const busquedaDefinicionSky = () => {
-        var fechaIni = getFecha(new Date(), -30)
-        var fechaFin = getFecha(new Date(), 0)
-        fetch(`${serverUrl}/sentinelap/searchSkiSat`, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json;charset=utf-8',
-            },
-            body: JSON.stringify({ 'geometria': geometria, 'fechaini': fechaIni, 'fechafin': fechaFin })
-        })
-            .then((res) => res.json())
-            .then(data => {
-                if (data.ok) {
-                    //console.log(data.ok);
-                } else {
-                    //console.log(data.error);
+
                 }
             })
     }
     function descargarImagen(tipo, datFecha) {
-        //console.log(geometria)
         var poligono = null
         if (getLayerText('poligono') != null) {
             var layer = getLayerText('poligono');
-            //console.log(layer.getSource().getFeatures()[0].getGeometry().getCoordinates())
+
             poligono = { "type": "MultiPolygon", "coordinates": [layer.getSource().getFeatures()[0].getGeometry().getCoordinates()] }
         } else if (getLayerText('newCapaUser') != null) {
             var layer = getLayerText('newCapaUser');
-            //console.log(layer.getSource().getFeatures()[0].getGeometry().getCoordinates())
+
             poligono = { "type": "MultiPolygon", "coordinates": layer.getSource().getFeatures()[0].getGeometry().getCoordinates() }
         } else {
             poligono = geometria;
         }
-        if (poligono != null) {
-            setLoading(true);
+        if (poligono != null ) {
+            var nombreImg = '';
+            if (tipo == 'V') {
+                nombreImg = `${getFechaNumerica(fechaHum[numDia], 0)}_1330_tem.tif`;
+            } else {
+                nombreImg = `${getFechaNumerica(fechaHum[numDia], 0)}_a_1330_tem.tif`
+            }
+            axios.get(`${serverUrl}/document/Temperatura/${nombreImg}`, {
+                responseType: 'blob'
+            })
+                .then(response => {
+                    FileSaver.saveAs(response.data, `${nombreImg}`)
+                })
+                .catch(error => {
+                    console.error('Error al realizar la solicitud:', error);
+                });
+            /*setLoading(true);
             var fechaI = '', fechaF = ''
             if (esSalo == false) {
                 fechaI = getFechaConvert(datFecha == null ? fechas[numDia] : datFecha, 0);
@@ -970,7 +914,7 @@ function MapContainer() {
                     fechaF = getFechaConvert(datFecha == null ? fechaHum[numDia] : datFecha, 0);
                 } else {
                     var fechaa = datFecha == null ? auxFechas[numDia] : datFecha;
-                    //console.log(fechaa);
+            
                     fechaI = fechaa.from;
                     fechaF = fechaa.to;
                 }
@@ -995,14 +939,14 @@ function MapContainer() {
                         }
                         MsgUtils.msgCorrecto("Descarga Correcta...")
                     } else {
-                        //console.log(data.error);
+                
                         MsgUtils.msgError(data.error);
                     }
                     setLoading(false);
                 }).catch((error) => {
                     MsgUtils.msgError(error);
                     setLoading(false);
-                })
+                })*/
         } else {
             MsgUtils.msgAdvertencia("Para realizar la descarga se requiere dibujar, cargar o seleccionar un predio, por favor ...")
         }
@@ -1011,20 +955,19 @@ function MapContainer() {
         var poligono = null
         if (getLayerText('poligono') != null) {
             var layer = getLayerText('poligono');
-            //console.log(layer.getSource().getFeatures()[0].getGeometry().getCoordinates())
+
             poligono = { "type": "MultiPolygon", "coordinates": [layer.getSource().getFeatures()[0].getGeometry().getCoordinates()] }
         } else if (getLayerText('newCapaUser') != null) {
             var layer = getLayerText('newCapaUser');
-            //console.log(layer.getSource().getFeatures()[0].getGeometry().getCoordinates())
-            //console.log(layer.getSource().getFeatures()[0].getGeometry().getType())
+
+
             poligono = { "type": layer.getSource().getFeatures()[0].getGeometry().getType(), "coordinates": layer.getSource().getFeatures()[0].getGeometry().getCoordinates() }
         } else {
-            poligono = { geometria, 'gid': infoPredio.gid };//parseInt(Math.random() * 100) }//
+            poligono = { geometria, 'infoPredio': infoPredio };//parseInt(Math.random() * 100) }//
         }
         return poligono;
     }
     function eventoSwipe() {
-        //console.log(activeSwiper.current, "valor swipe")
         if (activeSwiper.current == false) {
             activeSwiper.current = true;
             mapa.addControl(swipeRef.current);
@@ -1051,7 +994,7 @@ function MapContainer() {
                     url: "https://geon.forestryai.cl/geoserver/wms",
                     params: {
                         'LAYERS': 'cite:fundos_riego',
-                        CQL_FILTER: "c_dsc_faen='RIEGO ETAPA 1'",
+                        CQL_FILTER: "c_dsc_faen='RIEGO ETAPA 1' and c_dsc_agru='RIEGOS TEMP 2024_2025'",
                         transparent: true,
                         format: 'image/png', 'SRS': 'EPSG:3857'
                     },
@@ -1123,7 +1066,7 @@ function MapContainer() {
                     params: {
                         'LAYERS': 'cite:ri_control_riego',
                         transparent: true,
-                        format: 'image/png', 'SRS': 'EPSG:900913'
+                        format: 'image/png', 'SRS': 'EPSG:3857'
                     },
                     ratio: 1,
                     serverType: 'geoserver',
@@ -1140,58 +1083,92 @@ function MapContainer() {
                     params: {
                         'LAYERS': 'cite:ri_tipo_suelo',
                         transparent: true,
-                        format: 'image/png', 'SRS': 'EPSG:900913'
+                        format: 'image/png', 'SRS': 'EPSG:3857'
                     },
                     ratio: 1,
                     serverType: 'geoserver',
                     crossOrigin: 'anonymous'
                 })
             })
-            var capaSoya = new Image({
-                text: 'Soya',
-                title: 'Soya',
+            var capaPanio = new Image({
+                text: 'panio',
+                title: 'Paño',
                 visible: false,
                 baseLayer: false,
                 source: new ImageWMS({
-                    url: "https://geo.forestryai.cl/geoserver/wms",
+                    url: "https://geon.forestryai.cl/geoserver/wms",
                     params: {
-                        'LAYERS': 'cite:in_soya_4',
+                        'LAYERS': 'cite:ri_panos_riego',
                         transparent: true,
-                        format: 'image/png', 'SRS': 'EPSG:900913'
+                        format: 'image/png', 'SRS': 'EPSG:3857'
                     },
                     ratio: 1,
                     serverType: 'geoserver',
                     crossOrigin: 'anonymous'
                 })
             })
-            var capaAreasInra = new Image({
-                text: 'AreasInra',
-                title: 'Areas INRA',
+            var capaUtb = new Image({
+                text: 'utb',
+                title: 'UTB',
                 visible: false,
                 baseLayer: false,
                 source: new ImageWMS({
-                    url: "https://geo.forestryai.cl/geoserver/wms",
+                    url: "https://geon.forestryai.cl/geoserver/wms",
                     params: {
-                        'LAYERS': 'cite:in_areas',
+                        'LAYERS': 'cite:ri_utbs_riego',
                         transparent: true,
-                        format: 'image/png', 'SRS': 'EPSG:900913'
+                        format: 'image/png', 'SRS': 'EPSG:3857'
                     },
                     ratio: 1,
                     serverType: 'geoserver',
                     crossOrigin: 'anonymous'
                 })
             })
-            var capaAreasPrueba = new Image({
-                text: 'fundosPrueba',
-                title: 'fundo inra',
+            var capaNiveles = new Image({
+                text: 'curvasnivel',
+                title: 'Curvas de Nivel',
                 visible: false,
                 baseLayer: false,
                 source: new ImageWMS({
-                    url: "https://geo.forestryai.cl/geoserver/wms",
+                    url: "https://geon.forestryai.cl/geoserver/wms",
                     params: {
-                        'LAYERS': 'cite:fundos_proyecto_1',
+                        'LAYERS': 'cite:ri_curvas_nivel',
                         transparent: true,
-                        format: 'image/png', 'SRS': 'EPSG:32718'
+                        format: 'image/png', 'SRS': 'EPSG:3857'
+                    },
+                    ratio: 1,
+                    serverType: 'geoserver',
+                    crossOrigin: 'anonymous'
+                })
+            })
+            var capaSeleccionA = new Image({
+                text: 'seleccionA',
+                title: 'seleccionA',
+                visible: false,
+                baseLayer: false,
+                source: new ImageWMS({
+                    url: "https://geon.forestryai.cl/geoserver/wms",
+                    params: {
+                        'LAYERS': 'cite:ri_panos_riego_seleccion',
+                        transparent: true,
+                        format: 'image/png', 'SRS': 'EPSG:3857'
+                    },
+                    ratio: 1,
+                    serverType: 'geoserver',
+                    crossOrigin: 'anonymous'
+                })
+            })
+            var capaSeleccionB = new Image({
+                text: 'seleccionB',
+                title: 'seleccionB',
+                visible: false,
+                baseLayer: false,
+                source: new ImageWMS({
+                    url: "https://geon.forestryai.cl/geoserver/wms",
+                    params: {
+                        'LAYERS': 'cite:ri_utbs_riego_seleccion',
+                        transparent: true,
+                        format: 'image/png', 'SRS': 'EPSG:3857'
                     },
                     ratio: 1,
                     serverType: 'geoserver',
@@ -1208,23 +1185,19 @@ function MapContainer() {
             });
             mapa.addLayer(capaCultivos);
             mapa.addLayer(asignacion_roce);
+            mapa.addLayer(capaPanio);
+            mapa.addLayer(capaUtb);
+            mapa.addLayer(capaNiveles);
             mapa.addLayer(canalesRiego);
             mapa.addLayer(capaSeleccion);
+            mapa.addLayer(capaSeleccionA);
+            mapa.addLayer(capaSeleccionB);
             mapa.addLayer(capaControlRiego);
             mapa.addLayer(capaTipoSuelo);
-            //mapa.addLayer(capaTrabajadas);
-            //mapa.addLayer(capaSoya);
-            //mapa.addLayer(capaAreasInra);
-            //mapa.addLayer(capaAreasPrueba);
             mapa.on('singleclick', eventoClickMapa);
             mapa.on('pointermove', eventoMoveMapa);
             mapa.on('moveend', eventoMoveEnd);
             mapa.addControl(btn);
-            /*mapa.addControl(new LayerSwitcherImage({
-                handleClick: function (event) {
-                    //console.log(event)
-                }
-            }));*/
             mapa.setTarget(refMapa.current)
         }
     }
@@ -1253,7 +1226,6 @@ function MapContainer() {
             .then(res => res.json())
             .then(data => {
                 if (data.ok) {
-                    //console.log(data.ok);
                     var datosResultado = [...new Set(data.ok.features.map(item => item.properties.date))]
                     var datosObservado = [...new Set(data.ok.features.map(item => item.properties.observed))]
                     var cont = 0;
@@ -1271,7 +1243,6 @@ function MapContainer() {
             .catch(err => MsgUtils.msgError(err));
     }
     function mostrarPredio(valor) {
-        //console.log(proj.fromLonLat([valor.x, valor.y], 'EPSG:3857'))
         setShowModal(false);
         mapa.getView().setCenter([valor.x, valor.y]);//proj.fromLonLat([valor.x, valor.y], 'EPSG:3857'));
         mapa.getView().setZoom(14);
@@ -1284,17 +1255,14 @@ function MapContainer() {
             datos = sliderMap.filter((item) => item.name.split('_')[4].split('-')[0] == selectGestion)
         }
         var datoSelecc = datos[valor];
-        //console.log(datoSelecc)
         mapa.getLayers().forEach(function (layer) {
             if (layer instanceof TileLayer) {
                 if (layer.values_.text == 'Mapa Base') {
-                    var url = datoSelecc._links.tiles + tipoBaseMapa
-                    //console.log(url)
+                    var url = datoSelecc._links.tiles + tipoBaseMapa;
                     layer.getSource().setUrl(url)
                 }
                 if (layer.values_.text == 'Mapa HD') {
                     var anio = datoSelecc.name.split('_')[4].split('-')
-                    //console.log(anio);
                     var url = `https://earthtodate.com/v2/tci/{z}/{x}/{y}?end_date=${parseInt(anio[0])}-${anio[1]}-01&max_clouds=10`
                     layer.getSource().setUrl(url)
                     setAnioHD(anio);
@@ -1311,17 +1279,17 @@ function MapContainer() {
                     var url = layer.getSource().getUrls()[0]
                     if (url.includes('&proc=')) {
                         url = url.substring(0, url.indexOf('&'))
-                        //console.log(url)
+
                     }
                     layer.getSource().setUrl(url + valor);
-                    //console.log(url);
+
                     setTipoBaseMapa(valor);
                 }
             }
         })
     }
     function addMapSwipe(lado, tipoCapa, nombreCapa) {
-        //console.log(lado, capa, tipoCapa)
+
         if (lado == 'R') {
             //setEsSalo(false);
             setPredioDer(tipoCapa);
@@ -1333,9 +1301,7 @@ function MapContainer() {
         }
     }
     function activarCapaSwipe(val) {
-        //console.log(val)
         if (val == true) {
-            console.log("estoy activando el swipe", tipoPredio, esSalo)
             if (esSalo == false) {
                 if (tipoPredio == 'Mapa Base') {
                     var capaU = getLayerText('Mapa Base');
@@ -1436,7 +1402,7 @@ function MapContainer() {
             } else {
                 getLayerText('Mapa Base L').getSource().setUrl(mapas[1]._links.tiles)
             }
-            //console.log(mapas)
+
             capa.getSource().updateParams({ CQL_FILTER: "mes=" + valor });
             capa.setVisible(true);
             mapa.getView().setCenter([-7052088.609715326, -1809628.9014307333])
@@ -1519,7 +1485,6 @@ function MapContainer() {
         }
     }
     function activarDrawMeasure(valor) {
-        //console.log("activacion de medicion")
         if (drawDistancia.current != null) {
             mapa.removeInteraction(drawDistancia.current);
         }
@@ -1558,10 +1523,8 @@ function MapContainer() {
         drawDistancia.current.on('drawstart', function (evt) {
             // set sketch
             var sketch = evt.feature;
-
             /** @type {import("../src/ol/coordinate.js").Coordinate|undefined} */
             let tooltipCoord = evt.coordinate;
-
             var listener = sketch.getGeometry().on('change', function (evt) {
                 const geom = evt.target;
                 let output;
@@ -1722,7 +1685,6 @@ function MapContainer() {
         }
     }
     const cargarArchivoGeometria = (info, tipo) => {
-        //console.log(info.target.files.length, 'num archivos')
         if (fieldTablaCapa.length !== 0) {
             if (getLayerText('newCapaUser') != null) {
                 mapa.removeLayer(getLayerText('newCapaUser'))
@@ -1730,22 +1692,15 @@ function MapContainer() {
             var nombreArch = info.target.files[0].name.split('.');
             if (info.target.files.length == 1) {
                 if (nombreArch[nombreArch.length - 1] == 'geojson') {
-                    /*var reader = new FileReader();
-                    reader.addEventListener('load', function () {
-                        ponerGeojsonMap(JSON.parse(reader.result), tipo);
-                    });
-                    reader.readAsText(info.target.files[0]);*/
                     setLoading(true);
                     var formData = new FormData()
                     formData.append('file', info.target.files[0])
                     formData.append('fileName', info.target.files.name)
                     try {
-                        ////console.log(URL.createObjectURL(archiv));
                         axios.post(`${serverUrl}/archivo/uploadGeojson`, formData, {
                             'Accept': 'application/json',
                             'content-type': 'multipart/form-data'
                         }).then(res => {
-                            //console.log(res.data);
                             if (res.data.ok) {
                                 loadGeojsonUrl(res.data.ok, tipo);
                                 MsgUtils.msgCorrecto("archivo cargado")
@@ -1759,7 +1714,6 @@ function MapContainer() {
                             //MsgUtils.msgError(JSON.parse(error.request.response).error);
                             document.getElementById('fileUpload').value = null;
                             document.getElementById('fileUploadDos').value = null;
-                            //console.log("cuerpo", error.message);
                             setLoading(false);
                         })
                     } catch (error) {
@@ -1773,13 +1727,13 @@ function MapContainer() {
                     formData.append('file', info.target.files[0])
                     formData.append('fileName', info.target.files.name)
                     try {
-                        ////console.log(URL.createObjectURL(archiv));
+
                         setLoading(true);
                         axios.post(`${serverUrl}/archivo/uploadKml`, formData, {
                             'Accept': 'application/json',
                             'content-type': 'multipart/form-data'
                         }).then(res => {
-                            //console.log(res.data);
+
                             if (res.data.ok) {
                                 loadGeojsonUrl(res.data.ok, tipo);
                                 MsgUtils.msgCorrecto("archivo cargado")
@@ -1793,7 +1747,7 @@ function MapContainer() {
                             //MsgUtils.msgError(JSON.parse(error.request.response).error);
                             document.getElementById('fileUpload').value = null;
                             document.getElementById('fileUploadDos').value = null;
-                            //console.log("cuerpo", error.message);
+
                             setLoading(false);
                         })
                     } catch (error) {
@@ -1809,24 +1763,19 @@ function MapContainer() {
                 }
             } else {//if (nombreArch[nombreArch.length - 1] == 'shp') {
                 if (checkAllFiles(info.target.files)) {
-                    //console.log(info.target.files)
                     setLoading(true);
                     var formData = new FormData()
                     for (var fil of info.target.files) {
-                        //console.log(fil.name);
                         var archiv = fil
                         //formData.append('data', new Blob([archiv], { contentType: 'application/octet-stream', contentTransferEncoding: 'binary' }), archiv.name );
                         formData.append('file', archiv);
                     }
                     formData.append('fileName', archiv.name);
-                    //console.log(formData)
                     try {
-                        ////console.log(URL.createObjectURL(archiv));
                         axios.post(`${serverUrl}/archivo/upload`, formData, {
                             'Accept': 'application/json',
                             'content-type': 'multipart/form-data'
                         }).then(res => {
-                            //console.log(res.data);
                             if (res.data.ok) {
                                 document.getElementById('fileUpload').value = null;
                                 document.getElementById('fileUploadDos').value = null;
@@ -1840,7 +1789,6 @@ function MapContainer() {
                             }
                         }).catch(error => {
                             //MsgUtils.msgError(JSON.parse(error.request.response).error);
-                            //console.log("cuerpo", error.message);
                             setLoading(false);
                         })
                     } catch (error) {
@@ -1885,7 +1833,7 @@ function MapContainer() {
         var tipoPoligono = sourceNe.getSource().getFeatures()[0].getGeometry().getType();
         if (tipoPoligono == 'MultiPolygon' || tipoPoligono == 'Polygon') {
             var keyField = Object.keys(datos.features[0].properties);
-            //console.log(sourceNe.getSource().getFeatures()[0].getGeometry().getType())//if 'Poligon' || 'Multipoligon'
+
             mapa.getView().setCenter(olExtent.getCenter(sourceNe.getSource().getExtent()));
             mapa.addLayer(sourceNe);
             mapa.getView().fit(sourceNe.getSource().getExtent(), { duration: 1000 })
@@ -1909,7 +1857,7 @@ function MapContainer() {
                 ponerGeojsonMap(data, tipo)
                 setLoading(false);
             })
-        //.catch(error => console.log(error))
+        //.catch(error => 
     }
     function savePoligonoPredio(fields) {
         var layerCapa = getLayerText('Predios');
@@ -1950,15 +1898,15 @@ function MapContainer() {
         }
     }
     function crearSuscripcionPlanet(info) {
-        //console.log({ ...featuresNuevos, ...info })
+
         var poligono = null
         if (getLayerText('poligono') != null) {
             var layer = getLayerText('poligono');
-            //console.log(layer.getSource().getFeatures()[0].getGeometry().getCoordinates())
+
             poligono = { "type": "MultiPolygon", "coordinates": [layer.getSource().getFeatures()[0].getGeometry().getCoordinates()] }
         } else if (getLayerText('newCapaUser') != null) {
             var layer = getLayerText('newCapaUser');
-            //console.log(layer.getSource().getFeatures()[0].getGeometry().getCoordinates())
+
             poligono = { "type": "MultiPolygon", "coordinates": layer.getSource().getFeatures()[0].getGeometry().getCoordinates() }
         } else {
             MsgUtils.msgError("No eligio poligono para la suscripción")
@@ -1966,7 +1914,7 @@ function MapContainer() {
         if (poligono != null) {
             var infoUser = JSON.parse(localStorage.getItem('info'))
             var fechaI = new Date()
-            //console.log(poligono);
+
             fetch(`${serverUrl}/planetap/createSuscription`, {
                 method: 'POST',
                 headers: {
@@ -2068,10 +2016,10 @@ function MapContainer() {
             responseType: 'blob'
         })
             .then(response => {
-                //console.log(response.data);
+        
                 FileSaver.saveAs(response.data,"prueba.tiff")
                 //let imgUrl = URL.createObjectURL(response.data)
-                ////console.log(imgUrl);
+        
             })
             .catch(error => {
                 console.error('Error al realizar la solicitud:', error);
@@ -2155,7 +2103,6 @@ function MapContainer() {
             })
                 .then((res) => res.json())
                 .then(data => {
-                    //console.log(data)
                     if (data.ok) {
                         FileSaver.saveAs(`${serverUrl}/document/${data.ok}`, `${new Date().toISOString().substring(0, 10)}_deforestacion.geojson`);
                     } else {
@@ -2177,13 +2124,8 @@ function MapContainer() {
             })
                 .then((res) => res.json())
                 .then(data => {
-                    //console.log(data)
                     if (data.ok) {
                         FileSaver.saveAs(`${serverUrl}/document/${data.ok}`, `${new Date().toISOString().substring(0, 10)}_deforestacion.zip`);
-                        //var extenciones = ['.shp','.dbf','.prj','.shx']
-                        // for(var ext of extenciones){
-                        //FileSaver.saveAs(`${serverUrl}/document/${data.ok}${ext}`, `${new Date().toISOString().substring(0, 10)}_deforestacion${ext}`);
-                        //}
                     } else {
                         MsgUtils.msgError(data.error);
                     }
@@ -2261,7 +2203,6 @@ function MapContainer() {
                 getLayerText('Trabajadas').setVisible(false);
             }
             var filtroArea = listaAreasTrabajadas.filter(item => item.ciclo_agriario == valor)[0]
-            console.log(filtroArea)
             var capa = getLayerText('Soya');
             capa.getSource().updateParams({ "LAYERS": `cite:${filtroArea.layer_name_s}` });
             //capa.getSource().updateParams({ 'CQL_FILTER': "is_active=1 or is_active=0" });
@@ -2276,120 +2217,143 @@ function MapContainer() {
             mapa.changed();
         }
     }
-    function mostrarFiltroTrabajada(valor, indd) {
-        setTipoPredio(`trabajada${indd}`)
-        var capa = getLayerText('Trabajadas');
-        capa.getSource().updateParams({ 'CQL_FILTER': `${valor.valor}` });
-        capa.getSource().refresh();
-        capa.setVisible(true);
-        mapa.changed();
-    }
     function activarCapaInicial(tipoPredio, fechaa, nombreCapa, lado) {
-        if (tipoPredio.id == 'SWC') {
-            var capa = getLayerText(nombreCapa)
-            if (capa != null) {
-                //var fechaa = fechas[fechas.length - 1].fecha
-                var fechaNumerica = 'cite:' + getFechaNumerica(fechaa, 0) + '_swc'
-                modificarUrl(fechaNumerica, nombreCapa);
-                if (lado != '') {
-                    if (lado == 'R') {
-                        swipeRef.current.addLayer(capa, true)
-                    } else if (lado == 'L') {
-                        swipeRef.current.addLayer(capa)
-                    }
+        var capa = getLayerText('Predios')
+        if (capa != null) {
+            if (capa.getSource().getParams().LAYERS != tipoPredio.capaUPF) {
+                capa.getSource().updateParams({ LAYERS: tipoPredio.capaUPF });
+                tipoPredio.id == 'TEMP' ? capa.getSource().updateParams({ CQL_FILTER: '' }) : '';
+                var capautb = getLayerText('utb');
+                if (capautb != null) {
+                    capautb.getSource().updateParams({ LAYERS: tipoPredio.capaUTB });
+                    tipoPredio.id == 'TEMP' ? capautb.getSource().updateParams({ CQL_FILTER: '' }) : '';
                 }
-                capa.setVisible(true);
-            } else {
-                var imge = new Image({
-                    text: nombreCapa,
-                    title: nombreCapa,
-                    visible: true,
-                    baseLayer: false,
-                    source: new ImageWMS({
-                        url: "https://geon.forestryai.cl/geoserver/wms",
-                        params: {
-                            'LAYERS': 'cite:' + getFechaNumerica(fechaa, 0) + '_swc',
-                            transparent: true,
-                            format: 'image/png', 'SRS': 'EPSG:3857'
-                        },
-                        ratio: 1,
-                        serverType: 'geoserver',
-                        crossOrigin: 'anonymous'
-                    })
+            }
+        }
+        var nombreUrl = ''
+        if (tipoPredio.id == 'SWC') {
+            nombreUrl = 'cite:' + getFechaNumerica(fechaa, 0) + '_swc';
+        }else if(tipoPredio.id =='TEMP'){
+            nombreUrl = 'cite:' + getFechaNumerica(fechaa, 0) + '_1330_tem'
+        }else if(tipoPredio.id == 'TEMP2'){
+            nombreUrl = 'cite:' + getFechaNumerica(fechaa, 0) + '_0130_tem'
+        }
+        var capa = getLayerText(nombreCapa);
+        if (capa != null) {
+            modificarUrl(nombreUrl, nombreCapa);
+            if (lado != '') {
+                if (lado == 'R') {
+                    swipeRef.current.addLayer(capa, true);
+                } else if (lado == 'L') {
+                    swipeRef.current.addLayer(capa);
+                }
+            }
+            capa.setVisible(true);
+        } else {
+            var imge = new Image({
+                text: nombreCapa,
+                title: nombreCapa,
+                visible: true,
+                baseLayer: false,
+                source: new ImageWMS({
+                    url: "https://geon.forestryai.cl/geoserver/wms",
+                    params: {
+                        'LAYERS': nombreUrl,
+                        transparent: true,
+                        format: 'image/png', 'SRS': 'EPSG:3857'
+                    },
+                    ratio: 1,
+                    serverType: 'geoserver',
+                    crossOrigin: 'anonymous'
                 })
-                mapa.addLayer(imge);
-                if (lado != '') {
-                    if (lado == 'R') {
-                        swipeRef.current.addLayer(imge, true)
-                    } else if (lado == 'L') {
-                        swipeRef.current.addLayer(imge)
-                    }
+            })
+            mapa.addLayer(imge);
+            if (lado != '') {
+                if (lado == 'R') {
+                    swipeRef.current.addLayer(imge, true)
+                } else if (lado == 'L') {
+                    swipeRef.current.addLayer(imge)
                 }
             }
         }
     }
     const activarImgMapa = async (tipo) => {
-        if (tipo.id == 'SWC') {
-            setLoading(true);
-            try {
-                console.log(tipo)
-                var parametros = {
+        try {
+            var parametros;
+            if (tipo.id == 'SWC') {
+                setLoading(true);
+                parametros = {
                     "tipoPredio": "SWC",
-                    "fechaIni": "2024/12/19",
-                    "fechaFin": "2025/01/19"
+                    "fechaIni": "2024/01/25",
+                    "fechaFin": "2024/02/28"
                 }
-                var resultado = await PlanetApi.getFechasImagen(parametros)
-                if (resultado.ok) {
-                    console.log(resultado.ok)
-                    setAuxFechas(resultado.ok)
-                    setFechasHum(resultado.ok.map(item => item.fecha));
-                    desactivarPoligonoDibujar()
-                    setSelectFeature(false);
-                    setNumDia(resultado.ok.length - 1);
-                    setEsSalo(true);
-                    setTituloModal(`Estadisticas Contenido Agua en el Suelo`);
-                    setTipoPredio(tipo.id);
-                    setSelectTipoPredio(tipo);
-                    activarCapaInicial(tipo, resultado.ok[resultado.ok.length - 1].fecha, 'Ortofoto', '');
-                    filtraarPrediosRiego('RIEGO ETAPA 1')
-                    tipoActivado.current = tipo.id;
-                    mapa.getView().setCenter([-8049850.041933985, -4457582.448156962])
-                    mapa.getView().setZoom(12);
-                    //obtenerFechasAgua('2024-06-23', '2024-05-01', item)
-                } else {
-                    MsgUtils.msgError(resultado.error);
+            } else if (tipo.id == 'TEMP') {
+                setLoading(true);
+                parametros = {
+                    "tipoPredio": tipo.id,
+                    "fechaIni": "2025/01/15",
+                    "fechaFin": "2025/01/31"
                 }
-            } catch (error) {
-                MsgUtils.msgError(error)
-            } finally {
-                setLoading(false);
+            } else if (tipo.id == 'TEMP2') {
+                setLoading(true);
+                parametros = {
+                    "tipoPredio": tipo.id,
+                    "fechaIni": "2025/01/15",
+                    "fechaFin": "2025/01/31"
+                }
             }
+            var resultado = await PlanetApi.getFechasImagen(parametros)
+            if (resultado.ok) {
+                setAuxFechas(resultado.ok)
+                setFechasHum(resultado.ok.map(item => item.fecha));
+                desactivarPoligonoDibujar()
+                setSelectFeature(false);
+                setNumDia(resultado.ok.length - 1);
+                setEsSalo(true);
+                setTituloModal(`Estadísticas ${tipo.nombre}`);
+                setTipoPredio(tipo.id);
+                setSelectTipoPredio(tipo);
+                activarCapaInicial(tipo, resultado.ok[resultado.ok.length - 1].fecha, 'Ortofoto', '');
+                tipo.id == 'SWC' ? filtraarPrediosRiego('RIEGO ETAPA 1') : ''
+                tipoActivado.current = tipo.id;
+                mapa.getView().setCenter(tipo.id == 'SWC' ? [-8049850.041933985, -4457582.448156962] : [-8090611.7475655135, -4524011.613538556])
+                mapa.getView().setZoom(12);
+                //obtenerFechasAgua('2024-06-23', '2024-05-01', item)
+            } else {
+                MsgUtils.msgError(resultado.error);
+            }
+        } catch (error) {
+            MsgUtils.msgError(error)
+        } finally {
+            setLoading(false);
         }
     }
     function filtraarPrediosRiego(valor) {
         setFiltroFundoRiego(valor);
-        var capa = getLayerText('Predios');
-        capa.getSource().updateParams({ CQL_FILTER: "c_dsc_faen='" + valor + "' and c_dsc_agru='"+filtroRiegoGestion+"'" });
+        var filtrNivel = filtrosCapas.filter(item => item.id == nivelCapa)[0];
+        var capa = getLayerText(filtrNivel.capa);
+        capa.getSource().updateParams({ CQL_FILTER: "c_dsc_faen='" + valor + "' and c_dsc_agru='" + filtroRiegoGestion + "'" });
         capa.setVisible(true);
-        var capaSeleccion = getLayerText('seleccion');
+        var capaSeleccion = getLayerText(filtrNivel.capaselc);
         capaSeleccion.setVisible(false);
         mapa.changed()
-        mapa.getView().setZoom(8);
+        //mapa.getView().setZoom(8);
     }
-    function filtrarGestion(valor){
-        var capa = getLayerText('Predios');
+    function filtrarGestion(valor) {
+        var filtrNivel = filtrosCapas.filter(item => item.id == nivelCapa)[0];
+        var capa = getLayerText(filtrNivel.capa);
         setFiltroRiegoGestion(valor);
-        capa.getSource().updateParams({CQL_FILTER:"c_dsc_faen='"+filtroFundoRiego+"' and c_dsc_agru='"+valor+"'"});
+        capa.getSource().updateParams({ CQL_FILTER: "c_dsc_faen='" + filtroFundoRiego + "' and c_dsc_agru='" + valor + "'" });
         capa.setVisible(true);
-        var capaSeleccion = getLayerText('seleccion');
+        var capaSeleccion = getLayerText(filtrNivel.capaselc);
         capaSeleccion.setVisible(false);
         mapa.changed()
-        mapa.getView().setZoom(8);
+        //mapa.getView().setZoom(8);
     }
-    function actividadPanelBusqueda(val,objeto){
-        if(val==0){
+    function actividadPanelBusqueda(val, objeto) {
+        if (val == 0) {
             setActivarDivisor(false);
-        }else if(val==1){
+        } else if (val == 1) {
             var cordenadas = JSON.parse(objeto.geometria);
             var datosPoligono = {
                 "type": "FeatureCollection",
@@ -2408,13 +2372,49 @@ function MapContainer() {
             var vectorSource = new VectorDraw({
                 features: new GeoJSON().readFeatures(datosPoligono),
             });
-            var capa = getLayerText('seleccion');
+            setInfoPredio(objeto);
+            setGeometria(JSON.parse(objeto.geometria_gen));
+            geometriaAux.current = JSON.parse(objeto.geometria_gen);
+            setTipoPredio(saloWms[0].id);
+            setSelectFeature(true);
+            setSelectTipoPredio(saloWms[0]);
+            setTituloModal("Estadísticas " + saloWms[0].nombre + ' ' + filtroFundoRiego);
+            setEsSalo(true);
+            obtenerFechas(saloWms[0], '2024/11/01', '2024/12/19');
+            desactivarCapas()
+            var filtroNivel = filtrosCapas.filter(item => item.id == nivelCapa)[0]
+            var capa = getLayerText(filtroNivel.capaselc);
             capa.getSource().updateParams({ CQL_FILTER: "gid=" + objeto.gid });
             capa.setVisible(true);
+            var capa = getLayerText(filtroNivel.capa);
+            setFiltroRiegoGestion(objeto.c_dsc_agru);
+            setFiltroFundoRiego(objeto.c_dsc_faen);
+            capa.getSource().updateParams({ CQL_FILTER: "c_dsc_faen='" + objeto.c_dsc_faen + "' and c_dsc_agru='" + objeto.c_dsc_agru + "'" });
+            capa.setVisible(true);
             mapa.getView().setCenter([objeto.x, objeto.y])
-            mapa.getView().fit(vectorSource.getExtent(),{size:mapa.getSize()})
-            
+            mapa.getView().fit(vectorSource.getExtent(), { size: mapa.getSize() })
+        } else if (val == 3) {
+            setTipoModal('E');
+            setShowModal(true);
         }
+    }
+    function desactivarCapas() {
+        getLayerText('Predios').setVisible(false);
+        getLayerText('panio').setVisible(false);
+        getLayerText('utb').setVisible(false);
+        getLayerText('seleccion').setVisible(false);
+        getLayerText('seleccionA').setVisible(false);
+        getLayerText('seleccionB').setVisible(false);
+    }
+    function cambiarNivelCapa(valor) {
+        //setActivarDivisor(false)
+        setNivelCapa(valor);
+        desactivarCapas();
+        var filtroCap = filtrosCapas.filter(item => item.id == valor)[0]
+        var capa = getLayerText(filtroCap.capa);
+        tipoPredio == 'SWC' ? capa.getSource().updateParams({ CQL_FILTER: "c_dsc_faen='" + filtroFundoRiego + "' and c_dsc_agru='" + filtroRiegoGestion + "'" }) : '';
+        capa.setVisible(true);
+        mapa.changed()
     }
     useEffect(() => {
         if (viewP == false) {
@@ -2430,10 +2430,10 @@ function MapContainer() {
                     <div className='col m-0 p-0' style={{ width: `${activarDivisor == true ? '60%' : '100%'}` }}>
                         <div ref={refMapa} className={getClaseMapa()} ></div>
                     </div>
-                    {activarDivisor==true&&
-                    <div className='col m-0 p-0' style={{ width: `${activarDivisor == true ? '40%' : '0%'}` }}>
-                        <BuscarPredio collback={(val,objeto)=>actividadPanelBusqueda(val,objeto)}/>
-                    </div>}
+                    {activarDivisor == true &&
+                        <div className='col m-0 p-0' style={{ width: `${activarDivisor == true ? '40%' : '0%'}` }}>
+                            <BuscarPredio collback={(val, objeto) => actividadPanelBusqueda(val, objeto)} filtros={{ filtroFundoRiego, filtroRiegoGestion }} />
+                        </div>}
                 </div>
             </div>
             {mostrarLeyenda == true && datosUser.leyendaImgHd == 1 && <div className={`alert alert-light m-1 p-0 ${getPosicionLegenda()}`} >
@@ -2447,7 +2447,7 @@ function MapContainer() {
                 title='boton Swipe' onClick={() => eventoSwipe()}>
                 <img src='swipe.png' className='imgMapa' id='imgSwipe' />
             </button>
-            {activarDivisor==false&&<button className='btn m-0 p-1 btnLegend btFlotanteMenu btnMapaR'
+            {activarDivisor == false && <button className='btn m-0 p-1 btnLegend btFlotanteMenu btnMapaR'
                 title='Boton Legenda' onClick={() => activarLegenda()}>
                 <img src='legend.png' className='imgMapa' id='imgLegend' />
             </button>}
@@ -2492,6 +2492,10 @@ function MapContainer() {
                     multiple='true' id='fileUpload' webkitRelativePath='true'
                     onChange={(e) => cargarArchivoGeometria(e, 'P')} />
             </label>
+            <button className='btn m-0 p-1 btnExtPredio btFlotanteMenu btnMapaR'
+                title='Extender a la vista general de los fundos disponibles' onClick={() => activarInfoMapa()}>
+                <img src='verPredios.png' className='imgMapa' id='imgExtPredio' ></img>
+            </button>
             <button className='btn m-0 p-1 btnInfoMap btFlotanteMenu btnMapaR'
                 title='Información del Mapa' onClick={() => activarInfoMapa()}>
                 <img src='infoMapa.png' className='imgMapa' id='imgInfoMap' ></img>
@@ -2615,9 +2619,9 @@ function MapContainer() {
                             </div>
                         </div>}
                     {selectFeature && esSalo == false && fechas.length != 0 && <div className='px-2'> <SliderFecha fechas={fechas} tipo='S' selectTipoPredio={selectTipoPredio} collback={(val) => obtenerWmsDate(val)} /></div>}
-                    {esSalo && tipoPredio != 'SWC' && <label className="fs-6 text-light fw-bold"><i className="fa-solid fa-calendar-days fa-fade"></i>{` Fecha : ${fechaHum.length == 0 ? '-' : getDateFormat(fechaHum[numDia])}`}</label>}
-                    {esSalo && tipoPredio != 'SWC' && <div className='px-4'><SliderFecha fechas={fechaHum} tipo='V' selectTipoPredio={selectTipoPredio} collback={(val) => obtenerWmsDate(val)} /></div>}
-                    {tipoPredio == 'SWC' && esSalo == true && fechaHum.length != 0 &&
+                    {esSalo && ['SWC', 'TEMP', 'TEMP2'].includes(tipoPredio) == false && <label className="fs-6 text-light fw-bold"><i className="fa-solid fa-calendar-days fa-fade"></i>{` Fecha : ${fechaHum.length == 0 ? '-' : getDateFormat(fechaHum[numDia])}`}</label>}
+                    {esSalo && ['SWC', 'TEMP', 'TEMP2'].includes(tipoPredio) == false && <div className='px-4'><SliderFecha fechas={fechaHum} tipo='V' selectTipoPredio={selectTipoPredio} collback={(val) => obtenerWmsDate(val)} /></div>}
+                    {(['SWC', 'TEMP', 'TEMP2'].includes(tipoPredio) == true) && esSalo == true && fechaHum.length != 0 &&
                         <div className='row row-cols-3'>
                             <div className='col text-start'>
                                 <button className='btn btn-sm text-light ' title='Fechas atras'
@@ -2633,8 +2637,11 @@ function MapContainer() {
                                     <i className="fa-solid fa-angle-right"></i></button>
                             </div>
                         </div>}
-                    {tipoPredio == 'SWC' && esSalo == true && fechaHum.length != 0 &&
-                        <div className='px-4'> <SliderFecha fechas={fechaHum} tipo='S' selectTipoPredio={selectTipoPredio} collback={(val) => obtenerWmsDate(val)} /></div>}
+                    {(['SWC', 'TEMP', 'TEMP2'].includes(tipoPredio) == true) && esSalo == true && fechaHum.length != 0 &&
+                        <div className='px-4'>
+                            <SliderFecha fechas={fechaHum} tipo='S' selectTipoPredio={selectTipoPredio}
+                                collback={(val) => obtenerWmsDate(val)} />
+                        </div>}
                 </div>
                 <div className='container-fluid m-0 p-0' >
                     <div className='row row-cols-3 gx-0'>
@@ -2645,25 +2652,7 @@ function MapContainer() {
                                     onClick={() => cambiarCaroucel(false)}>
                                     <img src='/btnCaroucel.png' className='btnRotar' width='25'></img>
                                 </button>
-                                <div className='input-group input-group-sm'>
-                                    <span className="input-group-text bg-transparent text-light fw-bold" style={{ border: 'none' }}>Gestión</span>
-                                    <select className="form-select form-select-sm" 
-                                        id='selectGestion'
-                                        onChange={(e) => filtrarGestion(e.target.value)}>
-                                        {listaGestiones.map((item, index) => {
-                                            return (<option value={item.nombre} key={index}>{item.nombre}</option>)
-                                        })}
-                                    </select>
-                                </div>
-                                <div className="input-group input-group-sm">
-                                    <span className="input-group-text bg-transparent text-light fw-bold" style={{ border: 'none' }}>Faena</span>
-                                    <select className="form-select form-select-sm" id='selectFaena'
-                                        onChange={(e) => filtraarPrediosRiego(e.target.value)}>
-                                        {filtroPrediosRiego.map((item, index) => {
-                                            return (<option value={item.nombre} key={index}>{item.nombre}</option>)
-                                        })}
-                                    </select>
-                                </div>
+
                             </div>
                         </div>
                         <div className='col my-auto' >
@@ -2677,11 +2666,10 @@ function MapContainer() {
                                         multiple='true' webkitRelativePath='true'
                                         onChange={(e) => cargarArchivoGeometria(e, 'A')} />
                                 </label>}
-                                <button className='btn btn-transparent btn-sm text-light d-none'
+                                <button className='btn btn-transparent btn-sm text-light'
                                     title='Descargar Imagen'
-                                    //disabled={selectFeature ? false : true}
+                                    disabled={selectFeature ? false : true}
                                     onClick={() => {
-                                        //console.log(selectTipoPredio)
                                         if (selectTipoPredio != null) {
                                             setTituloModal(`Descargar Imagen ${selectTipoPredio.nombre}`); setTipoModal('D'); setShowModal(true);
                                         } else {
@@ -2700,51 +2688,46 @@ function MapContainer() {
                                     }}>
                                     <i class="fa-solid fa-images"></i></button>
                                 {(selectFeature == true && esSalo == true) && <button className='btn btn-sm btn-light text-success mx-0'
-                                    title='Mostrar las Estadisticas'
+                                    title='Mostrar las Estadísticas'
                                     onClick={() => {
-                                        if (false) {
-                                            var poligon = getLayerText('poligono');
-                                            if (poligon != null) {
-                                                let features = poligon.getSource().getFeatures();
-                                                features.forEach(feature => {
-                                                    let geometry = feature.getGeometry();
-                                                    setGeometria({ "type": "MultiPolygon", "coordinates": geometry.getCoordinates() });
-                                                    setSelectFeature(true);
-                                                });
-                                                setTipoGeomatria('D');
-                                                setTipoModal('E');
-                                                setShowModal(true);
-                                            } else {
-                                                MsgUtils.msgAdvertencia("Dibuje un poligono Por favor dentro del Area");
-                                            }
-                                        } else {
-                                            if (tipoPredio !== 'CATASTRAL') {
-                                                if (true) {
-                                                    var poligon = getLayerText('poligono');
-                                                    if (poligon != null) {
-                                                        let features = poligon.getSource().getFeatures();
-                                                        features.forEach(feature => {
-                                                            let geometry = feature.getGeometry();
-                                                            setGeometria({ "type": "MultiPolygon", "coordinates": geometry.getCoordinates() });
-                                                            setSelectFeature(true);
-                                                        });
-                                                        setTipoGeomatria('D');
-                                                    }
+                                        if (tipoPredio !== 'CATASTRAL') {
+                                            if (true) {
+                                                var poligon = getLayerText('poligono');
+                                                if (poligon != null) {
+                                                    let features = poligon.getSource().getFeatures();
+                                                    features.forEach(feature => {
+                                                        let geometry = feature.getGeometry();
+                                                        setGeometria({ "type": "MultiPolygon", "coordinates": geometry.getCoordinates() });
+                                                        setSelectFeature(true);
+                                                    });
+                                                    setTipoGeomatria('D');
                                                 }
-                                                setTipoModal('E');
-                                                setShowModal(true);
-                                            } else {
-                                                setTipoModal('W');
-                                                setShowModal(true);
                                             }
+                                            setTipoModal('E');
+                                            setShowModal(true);
+                                        } else {
+                                            setTipoModal('W');
+                                            setShowModal(true);
                                         }
                                     }}>
                                     <i className="fa-solid fa-chart-simple"></i></button>}
-                                {selectFeature == true && esSalo == true && <button className='btn btn-info btn-sm' id='btnShowInfo'
-                                    title='Mostrar Información del predio Seleccionado'
-                                    disabled={selectFeature ? false : true}
-                                    onClick={() => { setTipoModal('I'); setTituloModal('Información de la Faena'); setShowModal(true) }}>
-                                        <i className="fa-solid fa-circle-info"></i></button>}
+                                {selectFeature == true && esSalo == true &&
+                                    <button className='btn btn-info btn-sm' id='btnShowInfo'
+                                        title='Mostrar Información del predio Seleccionado'
+                                        disabled={selectFeature ? false : true}
+                                        onClick={() => {
+                                            setTipoModal('I');
+                                            if (nivelCapa == '1') {
+                                                setTituloModal('Información de la Faena');
+                                            } else if (nivelCapa == '2') {
+                                                setTituloModal('Información del Paño');
+                                            } else if (nivelCapa == '3') {
+                                                setTituloModal('Información de la UTB');
+                                            }
+                                            setShowModal(true);
+                                        }}>
+                                        <i className="fa-solid fa-circle-info"></i>
+                                    </button>}
                                 <button className='btn botonOscuro btn-sm'
                                     title='Buscar un predio'
                                     //disabled={selectFeature ? false : true}
@@ -2769,7 +2752,7 @@ function MapContainer() {
                             <Carousel.Item>
                                 <div className='row row-cols gx-1'>
                                     <div className='col' style={{ minWidth: '270px', maxWidth: '400px' }}>
-                                        <div className='container-fluid cardColorB  text-center' >
+                                        <div className='container-fluid cardColorA  text-center' >
                                             <div className='container-fluid'>
                                                 <div className='fw-bold'>Variables Planetarias</div>
                                             </div>
@@ -2778,7 +2761,7 @@ function MapContainer() {
                                                     {saloWms.map((item, index) => {
                                                         if (item.tipo == 'A') {
                                                             return (
-                                                                <div className={`w-100 ${'SWC' == tipoPredio ? 'optActivateA' : ''}`} key={index}>
+                                                                <div className={`w-100 ${tipoPredio.indexOf(item.id) != -1 ? 'optActivate' : ''}`} key={index}>
                                                                     <hr className="dropdown-divider m-0 p-0"></hr>
                                                                     <div className='row row-cols-2 gx-1'>
                                                                         <div className='col-10 my-auto text-start'>
@@ -2805,6 +2788,70 @@ function MapContainer() {
                                             </div>
                                         </div>
                                     </div>
+                                    {tipoPredio != undefined && ['SWC', 'TEMP', 'TEMP2'].includes(tipoPredio) == true &&
+                                        <div className='col' style={{ minWidth: '320px', maxWidth: '120px' }}>
+                                            <div className='container-fluid cardColorB text-center'>
+                                                <div className='container-fluid mb-1'>
+                                                    <hr className="dropdown-divider m-0 p-0"></hr>
+                                                </div>
+                                                <div className='container-fluid overflow-auto' style={{ minHeight: '65px', maxHeight: '65px' }}>
+                                                    <div className='input-group input-group-sm mb-1'>
+                                                        <span className="input-group-text bg-transparent text-light fw-bold" style={{ border: 'none' }}>Niveles</span>
+                                                        <select className="form-select form-select-sm bgColorB"
+                                                            id='selectNivelCapa' value={nivelCapa}
+                                                            onChange={(e) => cambiarNivelCapa(e.target.value)}>
+                                                            {filtrosCapas.map((item, index) => {
+                                                                if ((['TEMP', 'TEMP2'].includes(tipoPredio) == true && item.id != 2) || (tipoPredio == 'SWC' && item.id != 2)) {
+                                                                    return (<option value={item.id} key={index}>{item.nombre}</option>)
+                                                                }
+                                                            })}
+                                                        </select>
+                                                    </div>
+                                                    {['TEMP', 'TEMP2'].includes(tipoPredio) == true && <div className='input-group input-group-sm'>
+                                                        <span className="input-group-text bg-transparent text-light fw-bold" style={{ border: 'none' }}>Tiempo Solar</span>
+                                                        <select className="form-select form-select-sm bgColorB"
+                                                            id='selectimesolar' value={tipoPredio}
+                                                            onChange={(e) => {
+                                                                var dato = selectTipoPredio
+                                                                dato.id = (e.target.value)
+                                                                activarImgMapa(dato)
+                                                            }}>
+                                                            {timeSolar.map((item, index) => {
+                                                                return (<option value={item.id} key={index}>{item.nombre}</option>)
+                                                            })}
+                                                        </select>
+                                                    </div>}
+                                                </div>
+                                            </div>
+                                        </div>}
+                                    {tipoPredio != undefined && tipoPredio == 'SWC' && <div className='col' style={{ minWidth: '320px', maxWidth: '120px' }}>
+                                        <div className='container-fluid cardColorA text-center'>
+                                            <div className='container-fluid mb-1'>
+                                                <hr className="dropdown-divider m-0 p-0"></hr>
+                                            </div>
+                                            <div className='container-fluid overflow-auto' style={{ minHeight: '65px', maxHeight: '65px' }}>
+                                                <div className='input-group input-group-sm mb-1'>
+                                                    <span className="input-group-text bg-transparent text-dark fw-bold" style={{ border: 'none' }}>Gestión</span>
+                                                    <select className="form-select form-select-sm bgColorA"
+                                                        id='selectGestion' value={filtroRiegoGestion}
+                                                        onChange={(e) => filtrarGestion(e.target.value)}>
+                                                        {listaGestiones.map((item, index) => {
+                                                            return (<option value={item.nombre} key={index}>{item.nombre}</option>)
+                                                        })}
+                                                    </select>
+                                                </div>
+                                                <div className="input-group input-group-sm">
+                                                    <span className="input-group-text bg-transparent text-dark fw-bold" style={{ border: 'none' }}>Faena</span>
+                                                    <select className="form-select form-select-sm bgColorA" id='selectFaena' value={filtroFundoRiego}
+                                                        onChange={(e) => filtraarPrediosRiego(e.target.value)}>
+                                                        {filtroPrediosRiego.map((item, index) => {
+                                                            return (<option value={item.nombre} key={index}>{item.nombre}</option>)
+                                                        })}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>}
                                 </div>
                             </Carousel.Item>
                             <Carousel.Item>
@@ -2939,7 +2986,8 @@ function MapContainer() {
                 <Modal.Body className='m-1 p-0'>
                     {tipoModal === 'E' &&
                         <StadisticShow getGeometry={getGeometriaGeneral} tipoPredio={tipoPredio}
-                            info={selectTipoPredio} esSalo={esSalo} tipoGeometria={tipoGeometria} anios={anios} setCargador={setLoading} />}
+                            info={selectTipoPredio} esSalo={esSalo} tipoGeometria={tipoGeometria}
+                            anios={anios} setCargador={setLoading} capa={filtrosCapas.filter(item => item.id == nivelCapa)[0]} />}
                     {tipoModal === 'I' && infoPredio.gid != undefined &&
                         <div className='table-responsive'>
                             <table className='table table-transparent text-light table-sm table-bordered border-light'>
@@ -2949,14 +2997,25 @@ function MapContainer() {
                                         <th style={{ width: '140px' }}>Valor</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                {tipoPredio == 'SWC' && <tbody>
+                                    {nivelCapa == '3' &&
+                                        <tr>
+                                            <th>ID Utb</th>
+                                            <td>{infoPredio.gid}</td>
+                                        </tr>
+                                    }
+                                    {['2', '3'].includes(nivelCapa) == true &&
+                                        <tr>
+                                            <th>ID Paño</th>
+                                            <td>{infoPredio.n_id_pano}</td>
+                                        </tr>}
                                     <tr>
                                         <th>Codigo Fundo</th>
-                                        <td>{infoPredio.n_cod_fund}</td>
+                                        <td>{infoPredio.n_cod_fund == undefined ? infoPredio.cod_fundo : infoPredio.n_cod_fund}</td>
                                     </tr>
                                     <tr>
                                         <th>Rodal</th>
-                                        <td>{infoPredio.n_cod_roda}</td>
+                                        <td>{infoPredio.n_cod_roda == undefined ? infoPredio.cod_rodal : infoPredio.n_cod_roda}</td>
                                     </tr>
                                     <tr>
                                         <th>Nombre</th>
@@ -2967,18 +3026,116 @@ function MapContainer() {
                                         <td>{infoPredio.c_dsc_faen}</td>
                                     </tr>
                                     <tr>
+                                        <th>UPR</th>
+                                        <td>{infoPredio.n_id_upr}</td>
+                                    </tr>
+                                    <tr>
                                         <th>UPF</th>
                                         <td>{infoPredio.n_id}</td>
                                     </tr>
                                     <tr>
                                         <th>Area (has)</th>
-                                        <td>{parseInt(infoPredio.f_sup_ha_u).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</td>
+                                        <td>{nivelCapa == '3' ? infoPredio.f_sup_ha_u.toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : parseFloat(infoPredio.f_sup_ha_u).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</td>
                                     </tr>
                                     <tr>
                                         <th>Id</th>
                                         <td>{infoPredio.gid}</td>
                                     </tr>
-                                </tbody>
+                                </tbody>}
+                                {tipoPredio == 'TEMP' &&
+                                    <tbody>
+                                        <tr>
+                                            <th>Codigo Fundo</th>
+                                            <td>{infoPredio.cod_fundo}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Rodal</th>
+                                            <td>{infoPredio.cod_rodal}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>UP</th>
+                                            <td>{infoPredio.id_up}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Especie</th>
+                                            <td>{infoPredio.especie}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Empresa</th>
+                                            <td>{infoPredio.empresa_pl}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Ingeniero</th>
+                                            <td>{infoPredio.ingenierio}</td>
+                                        </tr>
+                                        {nivelCapa == 3 &&
+                                            <tr>
+                                                <th>Clase</th>
+                                                <td>{infoPredio.class_utb}</td>
+                                            </tr>}
+                                        {nivelCapa == 3 &&
+                                            <tr>
+                                                <th>Fecha Vuelo</th>
+                                                <td>{getDateFormat(infoPredio.fecha_vuel)}</td>
+                                            </tr>}
+                                        {nivelCapa == 3 &&
+                                            <tr>
+                                                <th>Densidad</th>
+                                                <td>{infoPredio.densidad}</td>
+                                            </tr>}
+                                        {nivelCapa == 3 &&
+                                            <tr>
+                                                <th>Replante</th>
+                                                <td>{infoPredio.replante}</td>
+                                            </tr>}
+                                        {nivelCapa == 3 &&
+                                            <tr>
+                                                <th>Secas</th>
+                                                <td>{infoPredio.secas}</td>
+                                            </tr>}
+                                        {nivelCapa == 3 &&
+                                            <tr>
+                                                <th>Faltantes</th>
+                                                <td>{infoPredio.faltantes}</td>
+                                            </tr>}
+                                        {nivelCapa == 3 &&
+                                            <tr>
+                                                <th>Ideal</th>
+                                                <td>{infoPredio.ideal}</td>
+                                            </tr>}
+                                        {nivelCapa == 3 &&
+                                            <tr>
+                                                <th>Crecimiento</th>
+                                                <td>{infoPredio.crecimient}</td>
+                                            </tr>}
+                                        {nivelCapa == 3 &&
+                                            <tr>
+                                                <th>Superficie Util</th>
+                                                <td>{getDateFormat(infoPredio.fecha_vuel)}</td>
+                                            </tr>}
+                                        {nivelCapa == 3 &&
+                                            <tr>
+                                                <th>Fecha Carga</th>
+                                                <td>{getDateFormat(infoPredio.fecha_carg)}</td>
+                                            </tr>}
+                                        <tr>
+                                            <th>UPR</th>
+                                            <td>{infoPredio.id_upr}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>UPF</th>
+                                            <td>{infoPredio.id_upf}</td>
+                                        </tr>
+                                        {nivelCapa == 3 &&
+                                            <tr>
+                                                <th>Clase Uso</th>
+                                                <td>{infoPredio.class_uso}</td>
+                                            </tr>}
+                                        <tr>
+                                            <th>Id</th>
+                                            <td>{infoPredio.gid}</td>
+                                        </tr>
+                                    </tbody>}
                             </table>
                             {infoDefo != null &&
                                 <div className='py-2'>
@@ -2991,10 +3148,10 @@ function MapContainer() {
                                 var nombre = saloWms.filter(item => item.id == tipoPredio)[0]
                                 setSelectFeature(true);
                                 setSelectTipoPredio(nombre)
-                                setTituloModal("Estadisticas " + nombre.nombre + ' ' + filtroFundoRiego)
+                                setTituloModal("Estadísticas " + nombre.nombre + ' ' + filtroFundoRiego)
                                 setTipoModal('E');
                                 setShowModal(true);
-                            }}>Ver estadisticas</button>}
+                            }}>Ver Estadísticas</button>}
                         </div>}
                     {tipoModal === 'T' && infoPredio.fid != undefined &&
                         <div>
@@ -3182,5 +3339,6 @@ Estadisticas de predios grandes , Mensaje predio muy grande o ver de cargar pred
 Mostrar otros datos ejm departamento
 cuando cargo con el mismo boton hay problema ---------#2024BoliviaForestry
 descarga de salo en blanco
+meteoblue ·6001Sajhy·
 */
 export default MapContainer

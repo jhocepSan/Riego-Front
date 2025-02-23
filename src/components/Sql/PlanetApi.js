@@ -55,5 +55,52 @@ async function getHistogramaGlobalPredio(info){
     })
     return resultado.json()
 }
+async function getFechasDisponibles(info){
+    var resultado = await fetch(`${serverUrl}/predio/getFechaRiegos`, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json;charset=utf-8',
+        },
+        body: JSON.stringify(info)
+    })
+    return resultado.json()
+}
+async function getResultTiempo(info) {
+    var resultado = await fetch(`${serverUrl}/predio/getResultTiempoRiego`, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json;charset=utf-8',
+        },
+        body: JSON.stringify(info)
+    })
+    return resultado.json()
+}
+
+async function getUtbClasificadoDay(info) {
+    var resultado = await fetch(`${serverUrl}/predio/getUtbClasificadoDay`, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json;charset=utf-8',
+        },
+        body: JSON.stringify(info)
+    })
+    return resultado.json()
+}
+
+async function getStadisticTemp(info){
+    var resultado = await fetch(`${serverUrl}/predio/getStadisticTemp`, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json;charset=utf-8',
+        },
+        body: JSON.stringify(info)
+    })
+    return resultado.json()
+}
 export default { getFechasImagen, getStadisticPredio,getStadisticGeometria,
-    getHistogramaPredio,getHistogramaGlobalPredio}
+    getHistogramaPredio,getHistogramaGlobalPredio,getFechasDisponibles,
+    getResultTiempo,getUtbClasificadoDay,getStadisticTemp}

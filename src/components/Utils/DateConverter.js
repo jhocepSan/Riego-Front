@@ -101,6 +101,16 @@ function getFechaNumerica(fecha,dias){ //ddmmyyyy
     
     return dia+''+mes+''+fecha1.getFullYear().toString()
 }
+function getFechaSimpli(fecha){
+    var fechaliteral=fecha.slice(0,10).split('-');
+    var fecha1 = new Date(fechaliteral[0],fechaliteral[1]-1,fechaliteral[2])
+    fecha1.setDate(fecha1.getDate());
+    var dia = fecha1.getDate();
+    dia = dia<10?`0${dia}`:dia;
+    var mes = fecha1.getMonth()+1;
+    mes = mes<10?`0${mes}`:mes;
+    return dia+'-'+mes+'-'+fecha1.getFullYear().toString().slice(-2)
+}
 function getFechaDMA(fecha,dias){ //dd-mm-yyyy
     //var fecha1 = new Date(fecha);
     //var fechaliteral=fecha.slice(0,10).split('-');
@@ -127,4 +137,4 @@ function getFechaActual(dias){
 export {getDateFormat,getDiasFecha,getFechaConvert,getFecha,getDayFormat,
     getFechaConvertMin,getFechaConvertFull,getYearFormat,getMesAnio,
     getFechaMinimo,getFechaConvertIso,getFechaActual,getFechaLiteral,
-    getFechaDMA,getFechaNumerica}
+    getFechaDMA,getFechaNumerica,getFechaSimpli}

@@ -5,6 +5,9 @@ import { serverUrl } from '../Utils/UtilsAplication.js';
 import MsgUtils from '../Utils/MsgUtils';
 import AddEditUsuario from './AddEditUsuario';
 import { ContextAplications } from '../../App';
+import AdminPermisos from './AdminPermisos.jsx';
+import {verificarPermiso} from '../Utils/ValidarPermiso.js';
+import AdmiPermisosUsuario from './AdmiPermisosUsuario.jsx';
 
 function AdministrarUsuario() {
     const { isLogin, setIsLogin, setLoading, datosUser, setDatosUser } = useContext(ContextAplications);
@@ -88,11 +91,14 @@ function AdministrarUsuario() {
                             <i className="fa-solid fa-user-plus"></i> Nuevo Usuario
                         </button>
                     </div>
-                    <div className='col' style={{ maxWidth: '170px', minWidth: '170px' }}>
-                        <button className='btn btn-secondary btn-sm w-100'><i className="fa-solid fa-lock"></i> Admin Permisos</button>
-                    </div>
+                    {verificarPermiso('2')&&<div className='col' style={{ maxWidth: '170px', minWidth: '170px' }}>
+                        <button className='btn btn-secondary btn-sm w-100'
+                            onClick={()=>{setTituloModal("Administrar Permisos Modulo");setTipoModal('A');setShowModal(true);}}>
+                            <i className="fa-solid fa-lock"></i> Admin Permisos</button>
+                    </div>}
                     <div className='col' style={{ maxWidth: '100px', minWidth: '100px' }}>
-                        <button className='btn btn-light btn-sm' onClick={() => setActualizar(!actualizar)}><i className="fa-solid fa-rotate-right"></i> Cargar</button>
+                        <button className='btn btn-light btn-sm' 
+                            onClick={() => setActualizar(!actualizar)}><i className="fa-solid fa-rotate-right"></i> Cargar</button>
                     </div>
                 </div>
             </div>
@@ -129,14 +135,26 @@ function AdministrarUsuario() {
                                                 checked={item.leyenda_imghd==1?true:false}
                                                 onChange={(e)=>cambiarEstadoLeyenda(item,e.target.value)}
                                             />
-                                            <button className='btn btn-sm mx-1 text-light'><i className="fa-solid fa-user-shield"></i></button>
-                                            <button className='btn btn-sm mx-1 text-light' onClick={() => { setTipoModal('E'); setTituloModal('Editar Usuario'); setSelectUser(item); setShowModal(true) }}>
+                                            <button className='btn btn-sm mx-1 text-light'
+                                                title={`Agregar permiso al Usuario ${item.nombres}`}
+                                                onClick={()=>{
+                                                    setTipoModal('U');setTituloModal('Permisos para '+item.nombres);
+                                                    setSelectUser(item);setShowModal(true);
+                                                }}
+                                                ><i className="fa-solid fa-user-shield"></i></button>
+                                            <button className='btn btn-sm mx-1 text-light'
+                                                title={`Editar el usuario - ${item.nombres}`} 
+                                                onClick={() => { setTipoModal('E'); setTituloModal('Editar Usuario'); setSelectUser(item); setShowModal(true) }}>
                                                 <i className="fa-solid fa-user-pen"></i>
                                             </button>
-                                            <button className='btn btn-sm mx-1 text-light' onClick={()=>{setTipoModal('P');setTituloModal("Cambiar Contraseña");setSelectUser(item);setShowModal(true);}}>
+                                            <button className='btn btn-sm mx-1 text-light' 
+                                                title={`Cambiar la contraseña de ${item.nombres}`}
+                                                onClick={()=>{setTipoModal('P');setTituloModal("Cambiar Contraseña");setSelectUser(item);setShowModal(true);}}>
                                                 <i className="fa-solid fa-user-secret"></i>
                                             </button>
-                                            <button className='btn btn-sm mx-1 text-light' onClick={() => { setTipoModal('R'); setTituloModal('Eliminar Usuario'); setSelectUser(item); setShowModal(true) }}>
+                                            <button className='btn btn-sm mx-1 text-light' 
+                                                title={`Eliminar al usuario '${item.nombres}' del sistema`}
+                                                onClick={() => { setTipoModal('R'); setTituloModal('Eliminar Usuario'); setSelectUser(item); setShowModal(true) }}>
                                                 <i className="fa-solid fa-trash"></i>
                                             </button>
                                         </div>
@@ -150,6 +168,7 @@ function AdministrarUsuario() {
             <Modal
                 show={showModal}
                 onHide={() => setShowModal(false)}
+                size={['E','P','R'].includes(tipoModal)?'md':'lg'}
                 backdrop="static"
                 keyboard={false}
                 contentClassName='fondoOscuro'
@@ -167,6 +186,11 @@ function AdministrarUsuario() {
                                 {`Seguro de eliminar al usuario (${selectUser.correo}) ...?`}
                             </p>
                         </div>}
+                    {tipoModal === 'A' &&
+                        <AdminPermisos/>
+                    }
+                    {tipoModal ==='U' &&
+                        <AdmiPermisosUsuario usuario={selectUser}/>}
                 </Modal.Body>
                 {tipoModal === 'R' &&
                     <Modal.Footer>

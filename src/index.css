@@ -258,20 +258,43 @@ input[type="file"] {
 
 .btnInfoMap {
     left: 4px;
+    top: 368px;
+}
+.btnExtPredio{
+    left: 4px;
     top: 330px;
 }
-
 .btnAddGeo {
     left: 4px;
     top: 293px
 }
-
+.textNaranja {
+    color: #ff9633;
+}
+.textAmarillo{
+    color: #ffcc33;
+}
 .ol-control button,
 .btnMapaR {
     background-color: rgba(33, 47, 61, .8) !important;
     color: aliceblue !important;
 }
-
+.btnMapaRR {
+    background-color: rgba(70, 116, 44, 0.8) !important;
+    color: aliceblue !important;
+}
+.btnMapaRC {
+    background-color: rgba(39, 105, 160, 0.8) !important;
+    color: aliceblue !important;
+}
+.btnMapaRN {
+    background-color: rgba(122, 122, 122, 0.8) !important;
+    color: aliceblue !important;
+}
+.btnMapaRU {
+    background-color: rgba(48, 73, 15, 0.8) !important;
+    color: aliceblue !important;
+}
 .bgBlue {
     background-color: rgb(0, 0, 58);
 }
@@ -280,6 +303,11 @@ input[type="file"] {
     background: #43536a;
     color: white;
     height: 142px;
+}
+.bgColorB{
+    border:none;
+    background-color: #dae3f2;
+    color: black;
 }
 
 .cardColorA {
@@ -414,4 +442,8 @@ color-legend {
 .conternedorPanelIzquierdo {
     padding-top: 54px;
     background-color: #4f5050;
+}
+.itemSelectOk{
+    font-style: italic;
+    background-color: #359632;
 }

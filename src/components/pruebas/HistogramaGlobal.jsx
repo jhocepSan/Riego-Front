@@ -54,7 +54,7 @@ function HistogramaGlobal(props) {
             return ' Area (Has) por cada tramo (%) de cobertura de dosel'
         } else if (tipoPredio == 'ABOVEGROUND_CARBON_DENSITY'||tipoPredio == 'ACD-DISPLAY') {
             return ' Area (Has) por cada tramo (%) de densidad de carbono'
-        } else if (tipoPredio == 'Agua Suelo') {
+        } else if (tipoPredio == 'SWC') {
             return ' Area (Has) por cada tramo (%) de humedad en el suelo'
         }
     }
@@ -122,7 +122,24 @@ function HistogramaGlobal(props) {
         return Array.from({ length }, (_, i) => (start + i * step).toFixed(2));
     }
     useEffect(() => {
-        var colores = ['#66ff66', '#a3c2c2', '#6666ff','#66ffff','#6666ff','#b366ff','#ffff66',
+        var colores = ['#e6f2ff',
+            '#cce6ff',
+            '#b3d9ff',
+            '#99ccff',
+            '#80bfff',
+            '#66b3ff',
+            '#4da6ff',
+            '#3399ff',
+            '#1a8cff',
+            '#0080ff',
+            '#0073e6',
+            '#0066cc',
+            '#0059b3',
+            '#004d99',
+            '#004080',
+            '#003366',
+            '#00264d',
+            '#001a33','#66ff66', '#a3c2c2', '#6666ff','#66ffff','#6666ff','#b366ff','#ffff66',
             'rgba(0, 255, 0, 1)', 'rgba(255, 255, 255, 1)', 'rgba(142, 41, 250, 1)', 'rgba(250, 107, 41, 1)',
             'rgba(41, 250, 244, 1)', 'rgba(250, 41, 228, 1)', 'rgba(158, 250, 41, 1)', 'rgba(175, 122, 197, 1)',
             'rgba(15, 156, 60, 1)', 'rgba(200, 60, 5, 1)', 'rgba(50, 50, 50, 1)', 'rgba(50, 49, 50, 1)']
@@ -135,9 +152,10 @@ function HistogramaGlobal(props) {
                     label = generateList(0,1,0.05).slice(1)
                 }
                 var listaElegida = Object.values(dato);
+                console.log(listaElegida)
                 data.push({
                     label: getFechaConvertFull(dato.fecha.substring(0, 10), 0),
-                    data: listaElegida.slice(3),
+                    data: listaElegida.slice(3).map(item=>parseFloat(item).toFixed(2)),
                     backgroundColor: colores[primero],
                 })
             }else if (tipoPredio == "CB-DISPLAY") {

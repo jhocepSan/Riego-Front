@@ -64,7 +64,7 @@ function AddEditUsuario(props) {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ isEdit, idUser, nameUser, nombres, apellidos, telefono, correo, password, idEmpresa, tipoUsuario })
+                body: JSON.stringify({ isEdit, idUser, nameUser, nombres, apellidos, telefono, correo, password,'id_empresa':idEmpresa, 'tipo_usuario':tipoUsuario })
             })
                 .then(res => res.json())
                 .then(data => {

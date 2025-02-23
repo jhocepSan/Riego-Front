@@ -1,4 +1,4 @@
-const serverUrl ='http://192.168.1.13:4001';//'https://backcmpc.forestryai.cl';//'https://backmar.forestryai.cl';//'https://back.forestryai.cl';//
+const serverUrl ='http://192.168.1.13:4001';//'https://backcmpc.forestryai.cl';//
 const validarInicioSesion=()=>{
     var datos = localStorage.getItem('initLogin');
     if(datos!=undefined){
